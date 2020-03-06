@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+urban_kit_frontend/node_modules/
+urban_kit_frontend/package-lock.json
 # C extensions
 *.so
 

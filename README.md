@@ -5,6 +5,8 @@ An out-of-box analysis tool for urban sensory data.
 
 ### Progress :rocket:
 
+- Finish building django & mongodb framework.
+
 - Finish Toolbox UI and front-end function.
 
   <img src="D:\Projects\UrbanKit\figs\ToolBox-UI.png" style="zoom:75%;" />
@@ -20,9 +22,9 @@ An out-of-box analysis tool for urban sensory data.
      - ~~design and implement tool-box~~. 
    - Finetune
 2. Backend Develop
-   - Build up Database: MongoDB. :fire:
-   - Build up backend framework: Django. :fire:
-   - Design front-back-end interface list.
+   - ~~Build up Database: MongoDB. ​~~
+   - ~~Build up backend framework: Django.~~ 
+   - Design front-back-end interface list. :fire:
    - Code for interface list.
 3. Algorithm Integration
    - SI-AGAN network for spatial interpolation.

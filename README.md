@@ -9,7 +9,7 @@ An out-of-box analysis tool for urban sensory data.
 
 - Finish Toolbox UI and front-end function.
 
-  <img src="D:\Projects\UrbanKit\figs\ToolBox-UI.png" style="zoom:75%;" />
+  <img src="figs\ToolBox-UI.png" alt="ToolBox" style="zoom:75%;" />
 
 - Finish Home Page Frontend(include data loading/uploading).<img src="figs\Index-UI.png" alt="Home Page" style="zoom:43%;" />
 

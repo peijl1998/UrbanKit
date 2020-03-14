@@ -16,7 +16,7 @@ Vue.config.productionTip = false
 
 // Replace by yours
 Vue.use(BaiduMap, {
-  ak: "xxx"
+  ak: "xxxxxx"
 })
 
 // Global Variables

@@ -1,17 +1,37 @@
 <template>
+  <div style="height:100%">
   <div id="map-chart" class="map-class">
+  </div>
   </div>
 </template>
 <script>
 require('echarts/extension/bmap/bmap')
 export default {
   name: 'Map',
-  props: [],
+  props: ["time_step", "attribute", "dot_shape", "dot_size"],
   data() {
     return {
       topChart: null,
       bmap: null,
+      option: null,
     }
+  },
+  watch: {
+    time_step() {
+      this.option.baseOption.timeline.data[1] = this.time_step;
+      this.mapChart.setOption(this.option, true);
+    },
+    attribute() {
+      console.log(this.attribute);
+    },
+    dot_shape() {
+      this.option.baseOption.series[0].symbol = this.dot_shape;
+      this.mapChart.setOption(this.option, true);
+    },
+    dot_size() {
+      this.option.baseOption.series[0].symbolSize = this.dot_size;
+      this.mapChart.setOption(this.option, true);
+    },
   },
   mounted: function() {
     this.mapChart = this.$echarts.init(document.getElementById('map-chart'));
@@ -56,7 +76,7 @@ export default {
         { name: "舟山", value: [116.2565556, 39.887, 20] },
         { name: "齐齐哈尔", value: [116.469, 39.9861111, 25] },
       ];
-      var option = {
+      this.option = {
         baseOption: {
           timeline: {
             axisType: 'category',
@@ -72,7 +92,7 @@ export default {
             },
             autoPlay: true,
             playInterval: 1000,
-            data: ["2017-1-1", "2017-1-2", "2017-1-3"]
+            data: ["2017-1-1", this.time_step, "2017-1-3"]
           },
           tooltip: {
             trigger: 'item',
@@ -123,7 +143,7 @@ export default {
           { series: [{ type: "effectScatter", data: JSON.parse(JSON.stringify(dataList3)) }] },
         ]
       }
-      this.mapChart.setOption(option);
+      this.mapChart.setOption(this.option);
     },
     init() {
       var geoCoordMap = {

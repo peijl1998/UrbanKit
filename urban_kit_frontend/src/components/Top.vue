@@ -5,10 +5,19 @@
 <script>
 export default {
   name: 'Top',
-  props: [],
+  props: ["attribute", "time_step"],
   data() {
     return {
       topChart: null,
+      option: null,
+    }
+  },
+  watch: {
+    attribute() {
+      this.reDraw(this.attribute, this.time_step);
+    },
+    time_step() {
+      this.reDraw(this.attribute, this.time_step);
     }
   },
   mounted: function() {
@@ -19,12 +28,19 @@ export default {
     this.init();
   },
   methods: {
+    reDraw(attr, time) {
+      if (attr == null) {
+        attr = "NULL";
+      }
+      this.option.title.text = "Beijing_" + attr + "_" + time + "_ Top7";
+      this.topChart.setOption(this.option, true);
+    },
     init() {
       var tops = ['Haidian', 'Chaoyang', 'Changping', 'Aotizhongxin', 'Xizhimen', 'Dongzhimen', 'Dongcheng'];
       var vals = [23200, 21500, 12500, 8500, 7500, 5500, 4600];
       var name = "Beijing_PM10_1_10 Top7";
       var colorArray = ['#C33B3BFF', "#D3632BFF", '#DD9B21', '#1ace4a', '#4bf3ff', '#4f9aff', '#b250ff'];
-      var option = {
+      this.option = {
         title: {
           text: name,
           textStyle: {
@@ -114,7 +130,7 @@ export default {
           data: vals
         }]
       };
-      this.topChart.setOption(option);
+      this.topChart.setOption(this.option);
     },
   },
 }

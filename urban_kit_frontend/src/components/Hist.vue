@@ -5,10 +5,19 @@
 <script>
 export default {
   name: 'Hist',
-  props: [],
+  props: ["attribute", "time_step"],
   data() {
     return {
       histChart: null,
+      option: null,
+    }
+  },
+  watch: {
+    attribute() {
+      this.reDraw(this.attribute, this.time_step);
+    },
+    time_step() {
+      this.reDraw(this.attribute, this.time_step);
     }
   },
   mounted: function() {
@@ -19,11 +28,17 @@ export default {
     this.init();
   },
   methods: {
+    reDraw(attr, time) {
+      var name = "Beijing_" + attr + "_" + time;
+      this.option.legend.data = [name];
+      this.option.series[0].name = name;
+      this.histChart.setOption(this.option, true);
+    },
     init() {
       var X = ['Haidian', 'Chaoyang', 'Changping', 'Aotizhongxin', 'Xizhimen', 'Dongzhimen', 'Dongcheng'];
       var Y = [4600, 5500, 7500, 8500, 12500, 21500, 23200];
       var name = "Beijing_PM10_1_10"
-      var option = {
+      this.option = {
         backgroundColor: '#1C2C41',
         tooltip: {
           trigger: 'axis',
@@ -115,7 +130,7 @@ export default {
           bottom: 0,
         }];
       }
-      this.histChart.setOption(option);
+      this.histChart.setOption(this.option);
     },
   },
 }

@@ -5,10 +5,18 @@
 <script>
 export default {
   name: 'CustomedTrend',
-  props: [],
+  props: ["attributes"],
   data() {
     return {
       customedTrendChart: null,
+      option: null,
+    }
+  },
+  watch: {
+    attributes() {
+      console.log(this.attributes);
+      this.option.legend.data = JSON.parse(JSON.stringify(this.attributes));
+      this.customedTrendChart.setOption(this.option, true);
     }
   },
   mounted: function() {
@@ -24,9 +32,8 @@ export default {
       var Y1 = [120, 110, 125, 145, 122, 165, 122, 220, 182, 191, 134, 150];
       var Y2 = [220, 182, 125, 145, 122, 191, 134, 150, 120, 110, 165, 122];
       var Y3 = [220, 182, 191, 134, 150, 120, 110, 125, 145, 122, 165, 122];
-      var option = {
+      this.option = {
         backgroundColor: '#1C2C41',
-
         title: {
           text: 'Customed Trend',
           textStyle: {
@@ -49,7 +56,7 @@ export default {
           itemWidth: 14,
           itemHeight: 5,
           itemGap: 13,
-          data: ['PM2.5', 'NO2', 'PM10'],
+          data: ['PM25', 'CO2', 'PM10'],
           right: '4%',
           textStyle: {
             fontSize: 12,
@@ -96,7 +103,7 @@ export default {
           }
         }],
         series: [{
-          name: 'PM2.5',
+          name: 'PM25',
           type: 'line',
           smooth: true,
           symbol: 'circle',
@@ -130,7 +137,7 @@ export default {
           },
           data: Y1
         }, {
-          name: 'NO2',
+          name: 'CO2',
           type: 'line',
           smooth: true,
           symbol: 'circle',
@@ -239,7 +246,7 @@ export default {
           bottom: 0,
         }];
       }
-      this.customedTrendChart.setOption(option);
+      this.customedTrendChart.setOption(this.option);
     },
   },
 }

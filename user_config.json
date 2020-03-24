@@ -1,9 +1,0 @@
-{
-	"mongodb": {
-		"database": "urbankit",
-		"user": "root",
-		"password": "123456",
-		"address": "39.97.247.132",
-		"port": "27017"
-	}
-}

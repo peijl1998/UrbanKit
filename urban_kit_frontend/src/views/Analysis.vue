@@ -21,7 +21,7 @@
                       <div>Time Step: </div>
                     </el-col>
                     <el-col :span="18" class="tool-box-col">
-                      <el-slider class="my-slider" show-input v-model="time_step" :step="1" style="width: 100%;">
+                      <el-slider class="my-slider" @change="timeChange" :min="0" :max="time_step_max" :format-tooltip="timeFormat" show-input v-model="time_step" :step="1" style="width: 100%;">
                       </el-slider>
                     </el-col>
                   </el-row>
@@ -64,10 +64,32 @@
                   </template>
                   <el-row class="tool-box-row" type="flex" justify="space-between">
                     <el-col :span="6" class="tool-box-col" style="padding-top: 4px">
+                      <div>Left Id: </div>
+                    </el-col>
+                    <el-col :span="18" class="tool-box-col">
+                      <el-select v-model="base_id_value" collapse-tags placeholder="Select..." class="trend-select">
+                        <el-option v-for="item in id_options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                      </el-select>
+                    </el-col>
+                  </el-row>
+                  <el-row class="tool-box-row" type="flex" justify="space-between">
+                    <el-col :span="6" class="tool-box-col" style="padding-top: 4px">
+                      <div>Right Id: </div>
+                    </el-col>
+                    <el-col :span="18" class="tool-box-col">
+                      <el-select v-model="customed_id_value" collapse-tags placeholder="Select..." class="trend-select">
+                        <el-option v-for="item in id_options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                      </el-select>
+                    </el-col>
+                  </el-row>
+                  <el-row class="tool-box-row" type="flex" justify="space-between">
+                    <el-col :span="6" class="tool-box-col" style="padding-top: 4px">
                       <div>Attributes: </div>
                     </el-col>
                     <el-col :span="18" class="tool-box-col">
-                      <el-select v-model="trend_value" multiple collapse-tags placeholder="Select..." class="trend-select">
+                      <el-select v-model="trend_value" @visible-change="handleMultiSelect" multiple :multiple-limit=3 collapse-tags placeholder="Select..." class="trend-select">
                         <el-option v-for="item in trend_options" :key="item.value" :label="item.label" :value="item.value">
                         </el-option>
                       </el-select>
@@ -84,7 +106,7 @@
                       <div>Time Step: </div>
                     </el-col>
                     <el-col :span="18" class="tool-box-col">
-                      <el-slider class="my-slider" show-input v-model="hist_time_step" :step="1" style="width: 100%;">
+                      <el-slider class="my-slider" :min="0" @change="histTimeChange" :max="time_step_max" :format-tooltip="timeFormat" show-input v-model="hist_time_step" :step="1" style="width: 100%;">
                       </el-slider>
                     </el-col>
                   </el-row>
@@ -131,7 +153,7 @@
           <el-col :span="24" class="row">
             <!-- Other Plots -->
             <div class="panel" style="height:100%;text-align:left">
-              <Top :attribute="map_attribute" :time_step="time_step"></Top>
+              <Top :attribute="map_attribute" :time_step="child_time_step"></Top>
             </div>
           </el-col>
         </el-row>
@@ -141,25 +163,25 @@
           <el-col :span="6" class="row">
             <!-- Value1 -->
             <div class="panel">
-              <Value index="Average" color="#3B8AC3FF"></Value>
+              <Value index="Mean" color="#3B8AC3FF" :time_step="child_time_step" :attribute="map_attribute"></Value>
             </div>
           </el-col>
           <el-col :span="6" class="row">
             <!-- Value2 -->
             <div class="panel">
-              <Value index="Max" color="#C97035FF"></Value>
+              <Value index="Max" color="#C97035FF" :time_step="child_time_step" :attribute="map_attribute"></Value>
             </div>
           </el-col>
           <el-col :span="6" class="row">
             <!-- Value3 -->
             <div class="panel">
-              <Value index="Min" color="#FF7F7FFF"></Value>
+              <Value index="Min" color="#FF7F7FFF" :time_step="child_time_step" :attribute="map_attribute"></Value>
             </div>
           </el-col>
           <el-col :span="6" class="row">
             <!-- Value4 -->
             <div class="panel">
-              <Value index="Median" color="#8C5DA1FF"></Value>
+              <Value index="Median" color="#8C5DA1FF" :time_step="child_time_step" :attribute="map_attribute"></Value>
             </div>
           </el-col>
         </el-row>
@@ -167,7 +189,7 @@
           <el-col :span="24" class="row">
             <!-- Map -->
             <div class="panel" style="height:100%">
-              <Map :time_step="time_step" :dot_size="dot_size" :dot_shape="dot_shape" :attribute="map_attribute"></Map>
+              <Map :time_step="child_time_step" :dot_size="dot_size" :dot_shape="dot_shape" :attribute="map_attribute"></Map>
             </div>
           </el-col>
         </el-row>
@@ -177,7 +199,7 @@
           <el-col :span="24" class="row">
             <!-- Histogram -->
             <div class="panel" style="height:100%">
-              <Hist :attribute="map_attribute" :time_step="time_step"></Hist>
+              <Hist :attribute="map_attribute" :time_step="child_time_step"></Hist>
             </div>
           </el-col>
         </el-row>
@@ -185,7 +207,7 @@
           <el-col :span="24" class="row">
             <!-- Customed Histogram -->
             <div class="panel" style="height:100%">
-              <CustomedHist :attribute="hist_attribute" :time_step="hist_time_step"></CustomedHist>
+              <CustomedHist :attribute="hist_attribute" :time_step="child_hist_time_step"></CustomedHist>
             </div>
           </el-col>
         </el-row>
@@ -195,13 +217,13 @@
       <el-col :span="12" class="row-footer">
         <!-- Line/Scatter -->
         <div class="panel" style="height:100%">
-          <Trend :attribute="map_attribute"></Trend>
+          <Trend :attribute="map_attribute" :id="base_id_value"></Trend>
         </div>
       </el-col>
       <el-col :span="12" class="row-footer" style="padding-left: 0">
         <!-- Customed Line/Scatter -->
         <div class="panel" style="height:100%">
-          <CustomedTrend :attributes="trend_value"></CustomedTrend>
+          <CustomedTrend :attributes="customed_trend_value" :id="customed_id_value"></CustomedTrend>
         </div>
       </el-col>
     </el-row>
@@ -266,35 +288,68 @@ export default {
       heat_visible: false,
       correlation_visible: false,
       time_step: 0,
+      child_time_step: 0,
+      time_step_max: 0,
+      time_step_options: [],
       hist_time_step: 0,
+      child_hist_time_step: 0,
       hist_attribute: null,
       dot_size: this.config_.dot_size,
       dot_shape: this.config_.dot_shape,
       trend_value: [],
+      customed_trend_value: [],
+      base_id_value: null,
+      customed_id_value: null,
       map_attribute: null,
-      trend_options: [{
-        value: 'PM25',
-        label: 'PM25'
-      }, {
-        value: 'NO',
-        label: 'NO'
-      }, {
-        value: 'CO',
-        label: 'CO'
-      }, {
-        value: 'CO2',
-        label: 'CO2'
-      }, {
-        value: 'PM10',
-        label: 'PM10'
-      }],
+      id_options: [],
+      trend_options: [],
     }
   },
   mounted: function() {
-
+    window.addEventListener('load', () => {
+      if (this.$route.path !== '/') {
+        this.$router.replace('/');
+      }
+    })
+    var promise = this.GetTimeLine(this.global_.data_name);
+    promise.then((response) => {
+      this.time_step_options = response.data;
+      this.time_step_max = this.time_step_options.length - 1;
+    })
+    promise = this.GetAttrList(this.global_.data_name);
+    promise.then((response) => {
+      var data = response.data;
+      this.trend_options = []
+      for (var i = 0; i < data.length; ++i) {
+        this.trend_options.push({ value: data[i], label: data[i] });
+      }
+    });
+    promise = this.GetIdList(this.global_.data_name);
+    promise.then((response) => {
+      var data = response.data;
+      this.id_options = []
+      for (var i = 0; i < data.length; ++i) {
+        if (data[i].length > 0) {
+          this.id_options.push({ value: data[i], label: data[i] });
+        }
+      }
+    });
   },
   methods: {
-
+    timeFormat(val) {
+      if (this.time_step_options.length == 0)
+        return val;
+      return this.time_step_options[val];
+    },
+    timeChange(val) {
+      this.child_time_step = val;
+    },
+    histTimeChange(val) {
+      this.child_hist_time_step = val;
+    },
+    handleMultiSelect() {
+      this.customed_trend_value = this.trend_value;
+    }
   },
 }
 
@@ -387,6 +442,10 @@ export default {
 }
 
 .map-attribute>>>.el-input__inner {
+  color: white;
+}
+
+.trend-select>>>.el-input__inner {
   color: white;
 }
 

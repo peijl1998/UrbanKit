@@ -5,34 +5,70 @@
 <script>
 export default {
   name: 'Trend',
-  props: ["attribute"],
+  props: ["attribute", "id"],
   data() {
     return {
       trendChart: null,
       option: null,
+      timeline: [],
+      vals: [],
+      data_signal: false
     }
   },
   watch: {
     attribute() {
-      this.option.title.text = "Beijing_" + this.attribute + "_Trend";
-      this.trendChart.setOption(this.option, true);
+      this.reDraw();
     },
+    id() {
+      console.log("id change.");
+      this.reDraw();
+    }
   },
   mounted: function() {
     this.trendChart = this.$echarts.init(document.getElementById('trend-chart'));
     window.addEventListener('resize', () => {
       this.trendChart.resize();
     })
-    this.init();
   },
   methods: {
-    init() {
-      var Y = ['13:00', '13:05', '13:10', '13:15', '13:20', '13:25', '13:30', '13:35', '13:40', '13:45', '13:50', '13:55'];
-      var X = [120, 110, 125, 145, 122, 165, 122, 220, 182, 191, 134, 150];
+    is_not_prepared() {
+      return this.global_.data_name == null || this.attribute == null || this.id == null;
+    },
+    async reDraw() {
+      if (this.is_not_prepared()) return;
+      await this.getData();
+      if (this.option == null) {
+        this.draw();
+      } else {
+        this.option.title.text = this.id + "_" + this.attribute + "_Trend";
+        this.option.xAxis[0].data = this.vals;
+        this.option.series[0].name = this.attribute;
+        this.option.series[0].data = this.timeline;
+        this.scale();
+        this.trendChart.setOption(this.option, true);
+      }
+    },
+    async getData() {
+      this.data_signal = false;
+      var promise = this.GetAttrById(this.global_.data_name, this.attribute, this.id);
+      await promise.then((response) => {
+        var data = response.data;
+        this.timeline = [];
+        this.vals = [];
+        for (var i = 0; i < data.length; ++i) {
+          this.timeline.push(data[i].time);
+          this.vals.push(data[i].value);
+        }
+        this.data_signal = true;
+      })
+    },
+    draw() {
+      if (this.data_signal == false) return;
+      var text = this.id + "_" + this.attribute + "_Trend";
       this.option = {
         backgroundColor: '#1C2C41',
         title: {
-          text: 'Beijing_PM2.5_Trend',
+          text: text,
           textStyle: {
             fontWeight: 'normal',
             fontSize: 15,
@@ -62,11 +98,11 @@ export default {
               color: '#ADADADFF'
             }
           },
-          data: Y
+          data: this.timeline,
         }],
         yAxis: [{
           type: 'value',
-          name: 'mm³',
+          name: false,
           axisTick: {
             show: false
           },
@@ -88,7 +124,7 @@ export default {
           }
         }],
         series: [{
-          name: 'PM2.5',
+          name: this.attribute,
           type: 'line',
           smooth: true,
           showSymbol: true,
@@ -117,31 +153,35 @@ export default {
               borderWidth: 12
             }
           },
-          data: X
+          data: this.vals,
         }]
       };
-      if (X.length > 100) {
-        option["grid"]["bottom"] = "10%";
-        option["dataZoom"] = [{
+      this.scale();
+      this.trendChart.setOption(this.option);
+    },
+    scale() {
+      if (this.timeline.length > 100) {
+        this.option["grid"]["bottom"] = "10%";
+        this.option["dataZoom"] = [{
           type: 'inside',
           start: 0,
-          end: 100
+          end: 50
         }, {
           start: 0,
-          end: 100,
-          handleSize: '80%',
-          height: 20,
+          end: 50,
+          handleSize: '100%',
+          height: 10,
           handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
           handleStyle: {
             color: '#A0A0A0FF',
             shadowBlur: 3,
             shadowColor: 'rgba(0, 0, 0, 0.6)',
           },
-          bottom: 0,
+          textStyle: false,
+          bottom: 5,
         }];
       }
-      this.trendChart.setOption(this.option);
-    },
+    }
   },
 }
 

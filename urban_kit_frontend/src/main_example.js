@@ -19,7 +19,7 @@ Vue.config.productionTip = false;
 
 // Replace by yours
 Vue.use(BaiduMap, {
-  ak: "S9ES8ITKOUuZYiR9DnMoYr1BIZ1DPvdp"
+  ak: "xxxx"
 })
 
 // Global Variables

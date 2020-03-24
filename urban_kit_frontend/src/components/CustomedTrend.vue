@@ -5,18 +5,22 @@
 <script>
 export default {
   name: 'CustomedTrend',
-  props: ["attributes"],
+  props: ["attributes", "id"],
   data() {
     return {
       customedTrendChart: null,
       option: null,
+      timeline: [],
+      vals: {},
+      data_signal: [],
     }
   },
   watch: {
     attributes() {
-      console.log(this.attributes);
-      this.option.legend.data = JSON.parse(JSON.stringify(this.attributes));
-      this.customedTrendChart.setOption(this.option, true);
+      this.reDraw();
+    },
+    id() {
+      this.reDraw();
     }
   },
   mounted: function() {
@@ -24,18 +28,50 @@ export default {
     window.addEventListener('resize', () => {
       this.customedTrendChart.resize();
     })
-    this.init();
   },
   methods: {
-    init() {
-      var X = ['13:00', '13:05', '13:10', '13:15', '13:20', '13:25', '13:30', '13:35', '13:40', '13:45', '13:50', '13:55'];
-      var Y1 = [120, 110, 125, 145, 122, 165, 122, 220, 182, 191, 134, 150];
-      var Y2 = [220, 182, 125, 145, 122, 191, 134, 150, 120, 110, 165, 122];
-      var Y3 = [220, 182, 191, 134, 150, 120, 110, 125, 145, 122, 165, 122];
+    is_not_prepared() {
+      return this.global_.data_name == null || this.attributes.length == 0 || this.id == null;
+    },
+    async getData() {
+      this.data_signal = false;
+      var promise = this.GetMultiAttrById(this.global_.data_name, JSON.parse(JSON.stringify(this.attributes)), this.id);
+      await promise.then((response) => {
+        var data = response.data;
+        this.timeline = [];
+        this.vals = {};
+        for (var i = 0; i < this.attributes.length; ++i) {
+          this.vals[this.attributes[i]] = [];
+        }
+        for (var i = 0; i < data.length; ++i) {
+          this.timeline.push(data[i].time);
+          for (var j = 0; j < this.attributes.length; ++j) {
+            this.vals[this.attributes[j]].push(data[i].value[this.attributes[j]]);
+          }
+        }
+        this.data_signal = true;
+      })
+    },
+    async reDraw() {
+      if (this.is_not_prepared()) return;
+      await this.getData();
+      if (this.option == null) {
+        this.draw();
+      } else {
+        this.option.title.text = this.id + "_Trend";
+        this.option.series = this.makeSeries();
+        this.option.xAxis[0].data = this.timeline;
+        this.scale();
+        this.customedTrendChart.setOption(this.option, true);
+      }
+    },
+    draw() {
+      if (this.data_signal == false) return;
+      var text = this.id + "_Trend";
       this.option = {
         backgroundColor: '#1C2C41',
         title: {
-          text: 'Customed Trend',
+          text: text,
           textStyle: {
             fontWeight: 'normal',
             fontSize: 15,
@@ -56,7 +92,7 @@ export default {
           itemWidth: 14,
           itemHeight: 5,
           itemGap: 13,
-          data: ['PM25', 'CO2', 'PM10'],
+          data: JSON.parse(JSON.stringify(this.attributes)),
           right: '4%',
           textStyle: {
             fontSize: 12,
@@ -77,11 +113,11 @@ export default {
               color: '#ADADADFF'
             }
           },
-          data: X
+          data: this.timeline
         }],
         yAxis: [{
           type: 'value',
-          name: 'mm³',
+          name: false,
           axisTick: {
             show: false
           },
@@ -102,152 +138,84 @@ export default {
             }
           }
         }],
-        series: [{
-          name: 'PM25',
-          type: 'line',
-          smooth: true,
-          symbol: 'circle',
-          symbolSize: 5,
-          showSymbol: false,
-          lineStyle: {
-            normal: {
-              width: 1
-            }
-          },
-          areaStyle: {
-            normal: {
-              color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(0, 136, 212, 0.3)'
-              }, {
-                offset: 0.8,
-                color: 'rgba(0, 136, 212, 0)'
-              }], false),
-              shadowColor: 'rgba(0, 0, 0, 0.1)',
-              shadowBlur: 10
-            }
-          },
-          itemStyle: {
-            normal: {
-              color: 'rgb(0,136,212)',
-              borderColor: 'rgba(0,136,212,0.2)',
-              borderWidth: 12
-
-            }
-          },
-          data: Y1
-        }, {
-          name: 'CO2',
-          type: 'line',
-          smooth: true,
-          symbol: 'circle',
-          symbolSize: 5,
-          showSymbol: false,
-          lineStyle: {
-            normal: {
-              width: 1
-            }
-          },
-          areaStyle: {
-            normal: {
-              color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(219, 50, 51, 0.3)'
-              }, {
-                offset: 0.8,
-                color: 'rgba(219, 50, 51, 0)'
-              }], false),
-              shadowColor: 'rgba(0, 0, 0, 0.1)',
-              shadowBlur: 10
-            }
-          },
-          itemStyle: {
-            normal: {
-
-              color: 'rgb(219,50,51)',
-              borderColor: 'rgba(219,50,51,0.2)',
-              borderWidth: 12
-            }
-          },
-          data: Y2
-        }, {
-          name: 'PM10',
-          type: 'line',
-          smooth: true,
-          symbol: 'circle',
-          symbolSize: 5,
-          showSymbol: false,
-          lineStyle: {
-            normal: {
-              width: 1
-            }
-          },
-          areaStyle: {
-            normal: {
-              color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(137, 189, 27, 0.3)'
-              }, {
-                offset: 0.8,
-                color: 'rgba(137, 189, 27, 0)'
-              }], false),
-              shadowColor: 'rgba(0, 0, 0, 0.1)',
-              shadowBlur: 10
-            }
-          },
-          itemStyle: {
-            normal: {
-              color: 'rgb(137,189,27)',
-              borderColor: 'rgba(137,189,2,0.27)',
-              borderWidth: 12
-
-            }
-          },
-          data: Y3
-        }]
+        series: this.makeSeries()
       };
-      if (X.length > 100) {
-        option["grid"]["bottom"] = "10%";
-        option["dataZoom"] = [{
-          type: 'inside',
-          start: 0,
-          end: 100
-        }, {
-          start: 0,
-          end: 100,
-          handleSize: '80%',
-          height: 20,
-          handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-          handleStyle: {
-            color: '#A0A0A0FF',
-            shadowBlur: 3,
-            shadowColor: 'rgba(0, 0, 0, 0.6)',
-          },
-          bottom: 0,
-        }];
-      }
-      if (X.length > 100) {
-        option["grid"]["bottom"] = "10%";
-        option["dataZoom"] = [{
-          type: 'inside',
-          start: 0,
-          end: 100
-        }, {
-          start: 0,
-          end: 100,
-          handleSize: '80%',
-          height: 20,
-          handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
-          handleStyle: {
-            color: '#A0A0A0FF',
-            shadowBlur: 3,
-            shadowColor: 'rgba(0, 0, 0, 0.6)',
-          },
-          bottom: 0,
-        }];
-      }
+      this.scale();
       this.customedTrendChart.setOption(this.option);
     },
+    makeSeries() {
+      var color1 = ['rgba(0, 136, 212, 0.3)', 'rgba(219, 50, 51, 0.3)', 'rgba(137, 189, 27, 0.3)'];
+      var color2 = ['rgba(0, 136, 212, 0)', 'rgba(219, 50, 51, 0)', 'rgba(137, 189, 27, 0)'];
+      var color3 = ['rgb(0,136,212)', 'rgb(219,50,51)', 'rgb(137,189,27)'];
+      var color4 = ['rgba(0,136,212,0.2)', 'rgba(219,50,51,0.2)', 'rgba(137,189,2,0.27)']
+      var series = [];
+      for (var i = 0; i < this.attributes.length; ++i) {
+        var temp = {
+          name: "-----",
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 5,
+          showSymbol: false,
+          lineStyle: {
+            normal: {
+              width: 1
+            }
+          },
+          areaStyle: {
+            normal: {
+              color: false,
+              shadowColor: 'rgba(0, 0, 0, 0.1)',
+              shadowBlur: 10
+            }
+          },
+          itemStyle: {
+            normal: {
+              color: 'color3',
+              borderColor: 'color4',
+              borderWidth: 12
+            }
+          },
+          data: []
+        };
+        temp.name = this.attributes[i];
+        temp.areaStyle.normal.color = new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+          offset: 0,
+          color: color1[i]
+        }, {
+          offset: 0.8,
+          color: color2[i]
+        }], false);
+        temp.itemStyle.normal.color = color3[i];
+        temp.itemStyle.normal.borderColor = color4[i];
+        temp.data = this.vals[this.attributes[i]];
+        series.push(temp);
+        console.log(series);
+      }
+      return series;
+    },
+    scale() {
+      if (this.timeline.length > 100) {
+        this.option["grid"]["bottom"] = "10%";
+        this.option["dataZoom"] = [{
+          type: 'inside',
+          start: 0,
+          end: 50
+        }, {
+          start: 0,
+          end: 50,
+          handleSize: '100%',
+          height: 10,
+          handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+          handleStyle: {
+            color: '#A0A0A0FF',
+            shadowBlur: 3,
+            shadowColor: 'rgba(0, 0, 0, 0.6)',
+          },
+          bottom: 5,
+        }];
+      }
+    }
   },
 }
 

@@ -10,14 +10,18 @@ export default {
     return {
       topChart: null,
       option: null,
+      tops: [],
+      vals: [],
+      data_signal: false,
+      timeline: [],
     }
   },
   watch: {
     attribute() {
-      this.reDraw(this.attribute, this.time_step);
+      this.reDraw();
     },
     time_step() {
-      this.reDraw(this.attribute, this.time_step);
+      this.reDraw();
     }
   },
   mounted: function() {
@@ -25,20 +29,42 @@ export default {
     window.addEventListener('resize', () => {
       this.topChart.resize();
     })
-    this.init();
   },
   methods: {
-    reDraw(attr, time) {
-      if (attr == null) {
-        attr = "NULL";
-      }
-      this.option.title.text = "Beijing_" + attr + "_" + time + "_ Top7";
-      this.topChart.setOption(this.option, true);
+    is_not_prepared() {
+      return this.global_.data_name == null || this.attribute == null || this.time_step == null;
     },
-    init() {
-      var tops = ['Haidian', 'Chaoyang', 'Changping', 'Aotizhongxin', 'Xizhimen', 'Dongzhimen', 'Dongcheng'];
-      var vals = [23200, 21500, 12500, 8500, 7500, 5500, 4600];
-      var name = "Beijing_PM10_1_10 Top7";
+    async getData() {
+      this.data_signal = false;
+      var promise = this.GetTopAttrByTime(this.global_.data_name, this.attribute, this.time_step, 7);
+      await promise.then((response) => {
+        var data = response.data;
+        this.tops = data.tops;
+        this.vals = data.vals;
+      })
+      promise = this.GetTimeLine(this.global_.data_name);
+      await promise.then((response) => {
+        this.timeline = response.data;
+        this.data_signal = true;
+      })
+    },
+    async reDraw() {
+      if (this.is_not_prepared()) return true;
+      await this.getData();
+      if (this.option == null) {
+        this.draw();
+      } else {
+        this.option.yAxis[0].data = this.tops;
+        this.option.series[0].data = this.vals;
+        this.option.title.text = this.attribute + "_Top7" + "(" +  this.timeline[this.time_step] + ")";
+        this.topChart.setOption(this.option, true);
+      }
+    },
+    draw() {
+      if (this.data_signal == false) return ;
+      var tops = this.tops;
+      var vals = this.vals;
+      var name = this.attribute + "_Top7" + "(" +  this.timeline[this.time_step] + ")";
       var colorArray = ['#C33B3BFF', "#D3632BFF", '#DD9B21', '#1ace4a', '#4bf3ff', '#4f9aff', '#b250ff'];
       this.option = {
         title: {
@@ -89,7 +115,6 @@ export default {
             },
             data: tops
           }
-
         ],
         series: [{
           name: '',

@@ -9,7 +9,7 @@
       </p>
       <div class="button-box">
         <el-button type="info" class="button1">Documents</el-button>
-        <el-button type="info" class="button2" @click="getStartVisible=true">Get Started</el-button>
+        <el-button type="info" class="button2" @click="refreshDataList();getStartVisible=true">Get Started</el-button>
       </div>
     </div>
     <el-dialog title="Data" :visible.sync="getStartVisible" width="40%" center>
@@ -25,7 +25,7 @@
             </el-table-column>
             <el-table-column label="Operation" width="180px">
               <template slot-scope="scope">
-                <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">Select</el-button>
+                <el-button size="mini" @click="handleSelect(scope.$index, scope.row)">Select</el-button>
                 <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
               </template>
             </el-table-column>
@@ -33,7 +33,7 @@
           <!-- View Data End -->
         </el-tab-pane>
         <el-tab-pane label="Upload">
-          <el-upload multiple :limit="6" :on-exceed="handleExceed" :before-remove="beforeRemove" ref="upload" action="https://jsonplaceholder.typicode.com/posts/" :file-list="fileList" :auto-upload="false">
+          <el-upload multiple :limit="6" :on-exceed="handleExceed" :on-success="handleSuccess" :on-error="handleError" :before-remove="beforeRemove" ref="upload" :before-upload="beforeUpload" :action="upload_api" :file-list="fileList" :auto-upload="false" accept=".csv">
             <el-button slot="trigger" size="small" type="primary">Select File</el-button>
             <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">Submit</el-button>
           </el-upload>
@@ -47,17 +47,11 @@ export default {
   name: 'Home',
   data() {
     return {
+      loading: {},
       fileList: [],
       getStartVisible: false,
-      tableData: [{
-        name: "Beijing_PM25_Index.csv"
-      }, {
-        name: "Beijing_PM10_Index.csv"
-      }, {
-        name: "Beijing_CO_Index.csv"
-      }, {
-        name: "Beijing_SO2_Index.csv"
-      }]
+      tableData: [],
+      upload_api: "http://" + this.config_.backend + this.global_.apis["upload_data"],
     }
   },
   mounted: function() {
@@ -71,20 +65,73 @@ export default {
     });
   },
   methods: {
+    refreshDataList() {
+      this.tableData = []
+      var promise = this.GetDataList();
+      promise.then((response) => {
+        var data = response.data;
+        for (var i = 0; i < data.length; ++i) {
+          this.tableData.push({ name: data[i] });
+        }
+      })
+    },
     submitUpload() {
       this.$refs.upload.submit();
+      setTimeout(() => {
+        this.refreshDataList();
+      }, 1000);
     },
     beforeRemove(file, fileList) {
-      return false;
+      return true;
+    },
+    beforeUpload(file) {
+      this.loading[file.name] = this.$loading({
+        lock: true,
+        text: 'Uploading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      return true;
     },
     handleExceed(files, fileList) {
       this.$message.warning(`Filelist length shouldn't exceed 6, selected ${files.length + fileList.length} files now.`);
     },
-    handleEdit(index, row) {
-      console.log(row.name);
+    handleSuccess(response, file, fileList) {
+      this.loading[file.name].close();
+      this.$message({
+        message: "File upload successfully!",
+        type: "success"
+      });
+    },
+    handleError(err, file, fileList) {
+      this.loading.close();
+      this.$message.error("Failed to upload file.")
+    },
+    handleSelect(index, row) {
+      const loading = this.$loading({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      setTimeout(() => {
+        loading.close();
+        this.global_.data_name = row.name;
+        this.$router.replace('/Analysis')
+      }, 2000);
     },
     handleDelete(index, row) {
-      console.log(row.name);
+      var promise = this.DeleteData(row.name);
+      promise.then((response) => {
+        this.$message({
+          message: "Data has been deleted!",
+          type: "success"
+        });
+        this.refreshDataList();
+      }).catch((error) => {
+        this.$message.error("Failed to delete data!");
+        console.log(error);
+      })
     }
   },
 }

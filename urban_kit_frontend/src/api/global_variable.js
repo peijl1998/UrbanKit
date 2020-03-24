@@ -1109,7 +1109,25 @@ const plainMapStyle = {
     }]
 }
 
+const apis = {
+    "get_data_list": "/data/get_collection_list",
+    "delete_data": "/data/delete_collection",
+    "upload_data": "/data/upload_csv_data",
+    "get_time_line": "/query/get_time_line",
+    "get_attr_list": "/query/get_attr_list",
+    "get_id_list": "/query/get_id_list",
+    "get_id_position": "/query/get_id_position",
+    "get_attr_by_time": "/query/get_attr_by_time",
+    "get_top_attr_by_time": "/query/get_top_attr_by_time",
+    "get_id_stat_by_time": "/query/get_id_stat_by_time",
+    "get_attr_by_id": "/query/get_attr_by_id",
+    "get_multi_attr_by_id": "/query/get_multi_attr_by_id",
+}
+
+var data_name = null;
 
 export default {
-    plainMapStyle
+    plainMapStyle,
+    apis,
+    data_name
 }

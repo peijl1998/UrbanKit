@@ -10,7 +10,6 @@ import os
 config_path = "../user_config.json"
 
 
-
 def GetConfig():
 	try:
 		config_json = {}
@@ -20,7 +19,6 @@ def GetConfig():
 		return config_json
 	except Exception as e:
 		raise Exception("ConfigReader GetConfig Error: ", e)
-
 
 
 if __name__ == "__main__":

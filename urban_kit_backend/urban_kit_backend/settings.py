@@ -11,9 +11,6 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-from Utils import ConfigReader
-
-config = ConfigReader.GetConfig()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,7 +25,7 @@ SECRET_KEY = '8%sbmk=gk#%ojplw=-u!mb(88cd%vjd##*2*5q#8u!x@g3zgi%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -40,18 +37,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'DataHandler',
-    'UrbanKitInterface'
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'urban_kit_backend.urls'
@@ -83,21 +81,6 @@ DATABASES = {
         'ENGINE': None,  # for mongodb.
     }
 }
-
-# setup mongodb
-from mongoengine import connect
-try:
-    database = config["mongodb"]
-    collection = database["database"]
-    ip = database["address"]
-    user = database["user"]
-    pwd = database["password"]
-    port = database["port"]
-    host = 'mongodb://{}:{}@{}:{}/?authSource={}&authMechanism=SCRAM-SHA-1'.format(user, pwd, ip, port, collection)
-    print(host)
-    connect(collection, host=host)
-except Exception as e:
-    raise Exception("Setup Database Error: ", e)
 
 
 # Password validation
@@ -137,3 +120,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = ()
+
+CORS_ALLOW_METHODS = (
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+    'VIEW',
+)
+
+CORS_ALLOW_HEADERS = (
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+)

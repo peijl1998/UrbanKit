@@ -188,7 +188,7 @@
         <el-row type="flex" justify="space-around" style="height: 85%">
           <el-col :span="24" class="row">
             <!-- Map -->
-            <div class="panel" style="height:100%">
+            <div class="panel">
               <Map :time_step="child_time_step" :dot_size="dot_size" :dot_shape="dot_shape" :attribute="map_attribute"></Map>
             </div>
           </el-col>
@@ -247,10 +247,10 @@
       <p>3. GAN Interpolation</p>
     </el-dialog>
     <!--Heat Map Modal-->
-    <el-dialog title="Time Series Anomaly Detection" :visible.sync="heat_visible" width="80%" center>
-      <p>1. Linear Interpolation</p>
-      <p>2. More advanced Interpolation</p>
-      <p>3. GAN Interpolation</p>
+    <el-dialog title="Heat Map Distribution" :visible.sync="heat_visible" width="80%" center class="my_dialog">
+      <div :style="getDialogStyle">
+      <HeatMap :time_step="child_time_step" :attribute="map_attribute"></HeatMap>
+      </div>
     </el-dialog>
     <!--Correlation Analysis Modal-->
     <el-dialog title="Time Series Anomaly Detection" :visible.sync="correlation_visible" width="80%" center>
@@ -268,6 +268,7 @@ import Hist from '@/components/Hist';
 import CustomedHist from '@/components/CustomedHist';
 import Top from '@/components/Top';
 import Map from '@/components/Map';
+import HeatMap from '@/components/HeatMap';
 
 export default {
   name: 'Analysis',
@@ -278,7 +279,8 @@ export default {
     Hist,
     CustomedHist,
     Top,
-    Map
+    Map,
+    HeatMap,
   },
   data() {
     return {
@@ -351,6 +353,14 @@ export default {
       this.customed_trend_value = this.trend_value;
     }
   },
+  computed: {
+    getDialogStyle: function() {
+      var height = Math.ceil(window.screen.height * 0.5);
+      return {
+        "height": height + "px",
+      }
+    }
+  }
 }
 
 </script>
@@ -485,7 +495,7 @@ export default {
 
 .dot-shape>>>.el-radio {
   color: #ADADADFF;
-  margin-right: 15px;
+  margin-right: 10px;
 }
 
 .dot-shape>>>.el-radio__input.is-checked,
@@ -544,6 +554,19 @@ export default {
   border: 0px solid white;
 }
 
+.my_dialog>>>.el-dialog--center .el-dialog__body {
+  padding: 1px 1px 1px;
+  background: #1C2C41;
+}
+
+.my_dialog>>>.el-dialog__header {
+  padding: 5px 5px 5px;
+  background: #C0C0C0;
+}
+
+.my_dialog>>>.el-dialog__headerbtn {
+  top: 10px;
+}
 </style>
 <style>
 .el-slider__runway,

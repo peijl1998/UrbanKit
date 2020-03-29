@@ -5,6 +5,10 @@ An out-of-box analysis tool for urban sensory data.
 
 ### Progress :rocket:
 
+- Finish Heat Map Distribution Feature
+
+  <img src="figs\HeatMap.png" alt="HeatMap" style="zoom:60%;" />
+
 - Finish backend logic for current features.
 
   <img src="figs\BackendLayer.png" alt="ToolBox" style="zoom:60%;" />
@@ -33,7 +37,8 @@ An out-of-box analysis tool for urban sensory data.
    - Add New Features.
 3. Algorithm Integration
    - SI-AGAN network for spatial interpolation. :fire:
-     - paper reading
+     - ~~paper reading~~ 
+     - design :fire:
      - develop
 4. Integrate Test
    - <del>Collect urban sensory data.  </del>

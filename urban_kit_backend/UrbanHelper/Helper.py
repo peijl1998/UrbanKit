@@ -45,6 +45,8 @@ def GetTimeLine(data_name):
 
 def GetAttrList(data_name):
     item = Base.QueryOneDocument(collection_name=data_name)
+    if not item:
+        return False
     ret = []
     for k in item.keys():
         if k not in ['_id', 'time', 'longitude', 'latitude', 'id']:

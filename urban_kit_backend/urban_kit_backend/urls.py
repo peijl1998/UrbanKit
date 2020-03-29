@@ -15,5 +15,6 @@ urlpatterns = [
     path(r'query/get_id_stat_by_time', views.get_id_stat_by_time),
     path(r'query/get_attr_by_id', views.get_attr_by_id),
     path(r'query/get_multi_attr_by_id', views.get_multi_attr_by_id),
+
     path(r'test/', views.test)
 ]

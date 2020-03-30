@@ -5,6 +5,10 @@ An out-of-box analysis tool for urban sensory data.
 
 ### Progress :rocket:
 
+- Finish and implement spatial interpolation design for SI-AGAN
+
+  <img src="figs\Interpolation.png" alt="Interpolation" style="zoom:60%;" />
+
 - Finish Heat Map Distribution Feature
 
   <img src="figs\HeatMap.png" alt="HeatMap" style="zoom:60%;" />

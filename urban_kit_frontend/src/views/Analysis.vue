@@ -229,10 +229,10 @@
     </el-row>
     <!--Advanced Functions Modal-->
     <!--Interpolation Modal-->
-    <el-dialog title="Spatial Interpolation" :visible.sync="interpolation_visible" width="80%" center>
-      <p>1. Linear Interpolation</p>
-      <p>2. More advanced Interpolation</p>
-      <p>3. GAN Interpolation</p>
+    <el-dialog title="Spatial Interpolation" :visible.sync="interpolation_visible" width="80%" center class="my_dialog">
+      <div :style="getDialogStyle">
+        <Interpolation :time_step="child_time_step" :attribute="map_attribute"></Interpolation>
+      </div>
     </el-dialog>
     <!--TS Prediction Modal-->
     <el-dialog title="Time Series Prediction" :visible.sync="prediction_visible" width="80%" center>
@@ -249,7 +249,7 @@
     <!--Heat Map Modal-->
     <el-dialog title="Heat Map Distribution" :visible.sync="heat_visible" width="80%" center class="my_dialog">
       <div :style="getDialogStyle">
-      <HeatMap :time_step="child_time_step" :attribute="map_attribute"></HeatMap>
+        <HeatMap :time_step="child_time_step" :attribute="map_attribute"></HeatMap>
       </div>
     </el-dialog>
     <!--Correlation Analysis Modal-->
@@ -269,6 +269,7 @@ import CustomedHist from '@/components/CustomedHist';
 import Top from '@/components/Top';
 import Map from '@/components/Map';
 import HeatMap from '@/components/HeatMap';
+import Interpolation from '@/components/Interpolation';
 
 export default {
   name: 'Analysis',
@@ -281,6 +282,7 @@ export default {
     Top,
     Map,
     HeatMap,
+    Interpolation
   },
   data() {
     return {
@@ -555,7 +557,7 @@ export default {
 }
 
 .my_dialog>>>.el-dialog--center .el-dialog__body {
-  padding: 1px 1px 1px;
+  padding: 0px 0px 0px;
   background: #1C2C41;
 }
 
@@ -567,6 +569,7 @@ export default {
 .my_dialog>>>.el-dialog__headerbtn {
   top: 10px;
 }
+
 </style>
 <style>
 .el-slider__runway,

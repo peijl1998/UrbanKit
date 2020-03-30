@@ -16,5 +16,8 @@ urlpatterns = [
     path(r'query/get_attr_by_id', views.get_attr_by_id),
     path(r'query/get_multi_attr_by_id', views.get_multi_attr_by_id),
 
+    path(r'model/train_model', views.train_model),
+    path(r'model/get_train_progress', views.get_train_progress),
+
     path(r'test/', views.test)
 ]

@@ -1122,6 +1122,8 @@ const apis = {
     "get_id_stat_by_time": "/query/get_id_stat_by_time",
     "get_attr_by_id": "/query/get_attr_by_id",
     "get_multi_attr_by_id": "/query/get_multi_attr_by_id",
+    "train_model": "/model/train_model",
+    "get_train_progress": "/model/get_train_progress",
 }
 
 var data_name = null;

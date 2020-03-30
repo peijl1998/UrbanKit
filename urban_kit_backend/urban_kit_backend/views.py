@@ -95,9 +95,26 @@ def get_multi_attr_by_id(request):
     return JsonResponse({'data': Helper.GetMultiAttrById(data_name, attrs, id),
                          'msg': 'success'})
 
+
+def train_model(request):
+    model_name = request.GET.get("model_name")
+    data_name = request.GET.get("data_name")
+    attr_name = request.GET.get("attr_name")
+    return JsonResponse({'data': True, 'msg': 'success'})
+
+
+test_progress = 0
+def get_train_progress(request):
+    global test_progress
+    model_name = request.GET.get("model_name")
+    progress = 100
+    progress = min(progress, test_progress)
+    if progress == 100:
+        test_progress = 0
+    else:
+        test_progress += 100
+    return JsonResponse({'data': progress})
+
+
 def test(request):
-    return HttpResponse("OK")
-
-
-def test_write(request):
     return HttpResponse("OK")

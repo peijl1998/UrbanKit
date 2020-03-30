@@ -114,7 +114,6 @@ async function GetAttrById(data_name, attr_name, id) {
 }
 
 async function GetMultiAttrById(data_name, attr_names, id) {
-  console.log(attr_names);
   var api = GetApi(global_.apis["get_multi_attr_by_id"]);
   const res = await axios.get(api, {
     params: {
@@ -126,8 +125,37 @@ async function GetMultiAttrById(data_name, attr_names, id) {
   return res.data;
 }
 
-function sleep(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+async function TrainModel(model_name, data_name, attr_names) {
+  var api = GetApi(global_.apis["train_model"]);
+  const res = await axios.get(api, {
+    params: {
+      model_name: model_name,
+      data_name: data_name,
+      attr_names: attr_names,
+    }
+  });
+  return res.data;
+}
+
+async function GetTrainProgress(model_name) {
+  var api = GetApi(global_.apis["get_train_progress"]);
+  const res = await axios.get(api, {
+    params: {
+      model_name: model_name
+    }
+  });
+  return res.data;
+}
+
+
+function sleep(ms) {
+  var start = new Date().getTime();
+  while (true) {
+    var time = new Date().getTime();
+    if (time - start > ms) {
+      break;
+    }
+  }
 }
 
 export default {
@@ -143,6 +171,8 @@ export default {
       Vue.prototype.GetMultiAttrById = (data_name, attr_names, id) => GetMultiAttrById(data_name, attr_names, id),
       Vue.prototype.GetTopAttrByTime = (data_name, attr_name, time_step, top) => GetTopAttrByTime(data_name, attr_name, time_step, top),
       Vue.prototype.GetIdStatByTime = (data_name, attr_name, time_step, stat_name) => GetIdStatByTime(data_name, attr_name, time_step, stat_name),
-      Vue.prototype.sleep = () => sleep()
+      Vue.prototype.sleep = (ms) => sleep(ms),
+      Vue.prototype.TrainModel = (model_name, data_name, attr_names) => TrainModel(model_name, data_name, attr_names),
+      Vue.prototype.GetTrainProgress = (model_name) => GetTrainProgress(model_name)
   }
 }

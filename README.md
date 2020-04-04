@@ -42,7 +42,10 @@ An out-of-box analysis tool for urban sensory data.
 3. Algorithm Integration
    - SI-AGAN network for spatial interpolation. :fire:
      - ~~paper reading~~ 
-     - design :fire:
+     - ~~design~~ 
      - develop
+       - ~~Finish SI-AGAN Model~~
+       - ~~Prepare Frontend~~
+       - Debug :fire:
 4. Integrate Test
    - <del>Collect urban sensory data.  </del>

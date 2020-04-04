@@ -18,6 +18,7 @@ urlpatterns = [
 
     path(r'model/train_model', views.train_model),
     path(r'model/get_train_progress', views.get_train_progress),
+    path(r'model/set_model_params', views.set_model_params),
 
     path(r'test/', views.test)
 ]

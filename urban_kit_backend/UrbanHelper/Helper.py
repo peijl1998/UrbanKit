@@ -3,12 +3,26 @@
 # Author: Pei
 
 from UrbanUtils.IO import ConfigReader
-from UrbanUtils.Mongo import Base
-from UrbanUtils.Algorithm import BaseStat
+from UrbanUtils.MongoPandas import Base
+from UrbanUtils.Math import BaseStat
+from UrbanHelper import ModelHelper
 import json
-import time
+import numpy as np
+
 
 config = ConfigReader.GetConfig()
+
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)
+
 
 
 def GetCollectionLists():
@@ -81,7 +95,6 @@ def GetAttrByTime(data_name, attr_name, time_step):
         return False
     time_step = timeline[time_step]
     items = Base.QueryManyDocument(collection_name=data_name, filter={'time': time_step}, mask={"id": 1, attr_name: 1})
-    items = json.loads(items)
 
     ret = []
     for item in items:
@@ -119,7 +132,6 @@ def GetAttrById(data_name, attr_name, id):
     items = Base.QueryManyDocument(collection_name=data_name, filter={'id': id}, mask={"time": 1, attr_name: 1})
     if not items:
         return False
-    items = json.loads(items)
 
     ret = []
     for item in items:
@@ -136,7 +148,6 @@ def GetMultiAttrById(data_name, attr_names, id):
         items = Base.QueryManyDocument(collection_name=data_name, filter={'id': id}, mask={"time": 1, attr: 1})
         if not items:
             return False
-        items = json.loads(items)
         items_dict[attr] = {}
         temp = []
         for item in items:
@@ -159,6 +170,11 @@ def GetMultiAttrById(data_name, attr_names, id):
         ret.append({'time': t, 'value': v})
 
     return ret
+
+
+def TrainModel(model_name, data_name, attr_name):
+    return ModelHelper.TrainModel(model_name, data_name, attr_name)
+
 
 
 

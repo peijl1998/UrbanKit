@@ -5,6 +5,7 @@
 from UrbanUtils.Mongo import MongoConnect
 from UrbanUtils.Mongo import Query
 from bson import json_util
+import json
 
 placeholder = {"_":-1}
 mongo = MongoConnect.ConnectMongo()
@@ -55,7 +56,8 @@ def QueryOneDocument(collection_name, filter=None, mask=None):
 def QueryManyDocument(collection_name, filter=None, mask=None):
     if collection_name not in GetCollectionLists():
         return False
-    return json_util.dumps(Query.QueryManyDocument(collection = mongo[collection_name], filter=filter, mask=mask))
+    return json.loads(
+        json_util.dumps(Query.QueryManyDocument(collection = mongo[collection_name], filter=filter, mask=mask)))
 
 
 

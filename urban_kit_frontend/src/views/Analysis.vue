@@ -315,6 +315,9 @@ export default {
         this.$router.replace('/');
       }
     })
+    if (this.global_.data_name == null) {
+      return ;
+    }
     var promise = this.GetTimeLine(this.global_.data_name);
     promise.then((response) => {
       this.time_step_options = response.data;

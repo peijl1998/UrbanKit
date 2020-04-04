@@ -20,7 +20,6 @@ export default {
       this.reDraw();
     },
     id() {
-      console.log("id change.");
       this.reDraw();
     }
   },
@@ -41,9 +40,9 @@ export default {
         this.draw();
       } else {
         this.option.title.text = this.id + "_" + this.attribute + "_Trend";
-        this.option.xAxis[0].data = this.vals;
+        this.option.xAxis[0].data = this.timeline;
         this.option.series[0].name = this.attribute;
-        this.option.series[0].data = this.timeline;
+        this.option.series[0].data = this.vals;
         this.scale();
         this.trendChart.setOption(this.option, true);
       }

@@ -1,16 +1,17 @@
 from django.http import HttpResponse, JsonResponse
 from UrbanHelper import Helper
-
+from UrbanUtils.IO import ConfigReader
+from UrbanHelper.Helper import MyEncoder
 
 def get_collection_list(request):
-    return JsonResponse({"data": Helper.GetCollectionLists(), "msg": "success"})
+    return JsonResponse({"data": Helper.GetCollectionLists(), "msg": "success"}, encoder=MyEncoder)
 
 
 def delete_collection(request):
     res = {"msg": "success"}
     if not Helper.DeleteCollection(request.GET.get("name")):
         res["msg"] = "failed"
-    return JsonResponse(res)
+    return JsonResponse(res, encoder=MyEncoder)
 
 
 def upload_csv_data(request):
@@ -36,32 +37,32 @@ def upload_csv_data(request):
                     msg = "success"
         return JsonResponse({'msg': msg})
     else:
-        return JsonResponse({'msg': 'not post method'})
+        return JsonResponse({'msg': 'not post method'}, encoder=MyEncoder)
 
 
 def get_time_line(request):
     data_name = request.GET.get("data_name")
-    return JsonResponse({'data': Helper.GetTimeLine(data_name), 'msg': 'success'})
+    return JsonResponse({'data': Helper.GetTimeLine(data_name), 'msg': 'success'}, encoder=MyEncoder)
 
 
 def get_attr_list(request):
     data_name = request.GET.get("data_name")
-    return JsonResponse({'data': Helper.GetAttrList(data_name), 'msg': 'success'})
+    return JsonResponse({'data': Helper.GetAttrList(data_name), 'msg': 'success'}, encoder=MyEncoder)
 
 def get_id_list(request):
     data_name = request.GET.get("data_name")
-    return JsonResponse({'data': Helper.GetIdList(data_name), 'msg': 'success'})
+    return JsonResponse({'data': Helper.GetIdList(data_name), 'msg': 'success'}, encoder=MyEncoder)
 
 def get_id_position(request):
     data_name = request.GET.get("data_name")
-    return JsonResponse({'data': Helper.GetIdPosition(data_name), 'msg': 'success'})
+    return JsonResponse({'data': Helper.GetIdPosition(data_name), 'msg': 'success'}, encoder=MyEncoder)
 
 def get_attr_by_time(request):
     data_name = request.GET.get("data_name")
     attr_name = request.GET.get("attr_name")
     time_step = int(request.GET.get("time_step"))
     return JsonResponse({'data': Helper.GetAttrByTime(data_name, attr_name, time_step),
-                         'msg': 'success'})
+                         'msg': 'success'}, encoder=MyEncoder)
 
 def get_top_attr_by_time(request):
     data_name = request.GET.get("data_name")
@@ -69,7 +70,7 @@ def get_top_attr_by_time(request):
     time_step = int(request.GET.get("time_step"))
     top = int(request.GET.get("top"))
     return JsonResponse({'data': Helper.GetTopAttrByTime(data_name, attr_name, time_step, top),
-                         'msg': 'success'})
+                         'msg': 'success'}, encoder=MyEncoder)
 
 def get_id_stat_by_time(request):
     data_name = request.GET.get("data_name")
@@ -77,7 +78,7 @@ def get_id_stat_by_time(request):
     time_step = int(request.GET.get("time_step"))
     stat_name = request.GET.get("stat_name")
     return JsonResponse({'data': Helper.GetIdStatByTime(data_name, attr_name, time_step, stat_name),
-                         'msg': 'success'})
+                         'msg': 'success'}, encoder=MyEncoder)
 
 
 def get_attr_by_id(request):
@@ -85,7 +86,7 @@ def get_attr_by_id(request):
     attr_name = request.GET.get("attr_name")
     id = request.GET.get("id")
     return JsonResponse({'data': Helper.GetAttrById(data_name, attr_name, id),
-                         'msg': 'success'})
+                         'msg': 'success'}, encoder=MyEncoder)
 
 
 def get_multi_attr_by_id(request):
@@ -93,14 +94,15 @@ def get_multi_attr_by_id(request):
     id = request.GET.get("id")
     attrs = request.GET.getlist("attr_names[]")
     return JsonResponse({'data': Helper.GetMultiAttrById(data_name, attrs, id),
-                         'msg': 'success'})
+                         'msg': 'success'}, encoder=MyEncoder)
 
 
 def train_model(request):
     model_name = request.GET.get("model_name")
     data_name = request.GET.get("data_name")
     attr_name = request.GET.get("attr_name")
-    return JsonResponse({'data': True, 'msg': 'success'})
+    return JsonResponse({'data': Helper.TrainModel(model_name, data_name, attr_name), 'msg': 'success'},
+                        encoder=MyEncoder)
 
 
 test_progress = 0
@@ -113,7 +115,20 @@ def get_train_progress(request):
         test_progress = 0
     else:
         test_progress += 100
-    return JsonResponse({'data': progress})
+    return JsonResponse({'data': progress}, encoder=MyEncoder)
+
+
+def set_model_params(request):
+    model_name = request.GET.get("model_name")
+    if model_name == "SI-AGAN":
+        config = {}
+        for k in ["grid_size", "generator_lr", "discriminator_lr", "pre_train_epoch", "train_epoch",
+                  "batch_size", "mean_shift_radius", "mean_shift_bandwith"]:
+            if k in request.GET.keys():
+                config[k] = request.GET.get(k)
+        ConfigReader.SetModelConfig(config, "SI-AGAN")
+
+    return JsonResponse({"msg": "success"}, encoder=MyEncoder)
 
 
 def test(request):

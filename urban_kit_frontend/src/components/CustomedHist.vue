@@ -62,7 +62,7 @@ export default {
         this.option.legend.data = [name];
         this.option.series[0].name = name;
         this.scale();
-        this.histChart.setOption(this.option, true);
+        this.customedHistChart.setOption(this.option, true);
       }
     },
     draw() {

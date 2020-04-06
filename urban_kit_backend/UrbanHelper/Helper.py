@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 # Author: Pei
+from django.http import HttpResponse
 
-from UrbanUtils.IO import ConfigReader
+from UrbanUtils.IO import ConfigReader, FileUtils
 from UrbanUtils.MongoPandas import Base
 from UrbanUtils.Math import BaseStat
 from UrbanHelper import ModelHelper
 import json
 import numpy as np
 
-
 config = ConfigReader.GetConfig()
+
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -22,7 +23,6 @@ class MyEncoder(json.JSONEncoder):
             return obj.tolist()
         else:
             return super(MyEncoder, self).default(obj)
-
 
 
 def GetCollectionLists():
@@ -53,8 +53,22 @@ def UploadCsv(file_name, file):
         return False
 
 
+def UploadModel(file_name, file):
+    try:
+        FileUtils.WriteFile(file, ConfigReader.GetModelConfig(file_name), "wb")
+        return True
+    except Exception as e:
+        print("{} save mongo failed. [{}]".format(file_name, str(e)))
+        return False
+
+
+
 def GetTimeLine(data_name):
-    return Base.QueryDistinct(collection_name=data_name, key="time")
+    ret = []
+    for t in Base.QueryDistinct(collection_name=data_name, key="time"):
+        if t != None:
+            ret.append(t)
+    return ret
 
 
 def GetAttrList(data_name):
@@ -139,6 +153,7 @@ def GetAttrById(data_name, attr_name, id):
 
     return ret
 
+
 def GetMultiAttrById(data_name, attr_names, id):
     if len(attr_names) == 0:
         return True
@@ -173,9 +188,120 @@ def GetMultiAttrById(data_name, attr_names, id):
 
 
 def TrainModel(model_name, data_name, attr_name):
+    RemoveLog(model_name)
     return ModelHelper.TrainModel(model_name, data_name, attr_name)
 
 
+def PredictOne(model_name, data_name, longitude, latitude, time_step, attr_name):
+    id_pos = GetIdPosition(data_name)
+    id_val_list = GetAttrByTime(data_name, attr_name, time_step)
+    id_val = {}
+    for item in id_val_list:
+        id_val[item["id"]] = item["value"]
+    more = []
+    for k in id_pos:
+        more.append(id_pos[k] + [id_val[k]])
+    return ModelHelper.PredictOne(model_name, longitude, latitude, more)
+
+
+def PredictMany(model_name, data_name, time_step, attr_name):
+    id_pos = GetIdPosition(data_name)
+    id_val_list = GetAttrByTime(data_name, attr_name, time_step)
+    id_val = {}
+    for item in id_val_list:
+        id_val[item["id"]] = item["value"]
+    more = []
+    for k in id_pos:
+        more.append(id_pos[k] + [id_val[k]])
+    return ModelHelper.PredictMany(model_name, more)
+
+
+def PredictMany1(model_name, data_name, time_step, attr_name):
+    id_pos = GetIdPosition(data_name)
+    id_val_list = GetAttrByTime(data_name, attr_name, time_step)
+    id_val = {}
+    for item in id_val_list:
+        id_val[item["id"]] = item["value"]
+    more = []
+    for k in id_pos:
+        more.append(id_pos[k] + [id_val[k]])
+
+    def get_bound(region, size=20):
+        min_p = [361, 361]
+        max_p = [-1, -1]
+        for r in region:
+            if r[0] <= min_p[0]:
+                min_p[0] = r[0]
+            if r[1] <= min_p[1]:
+                min_p[1] = r[1]
+            if r[0] >= max_p[0]:
+                max_p[0] = r[0]
+            if r[1] >= max_p[1]:
+                max_p[1] = r[1]
+
+        ret = []
+        x_gap = (max_p[0] - min_p[0]) / size
+        y_gap = (max_p[1] - min_p[1]) / size
+        for i in range(size):
+            for j in range(size):
+                ret.append([min_p[0] + x_gap * i, min_p[1] + y_gap * j])
+
+        return ret
+
+    aug_data = get_bound(more)
+
+    return ModelHelper.PredictMany1(model_name, aug_data, more)
+
+
+def RemoveLog(model_name):
+    FileUtils.DeleteFile(ConfigReader.GetModelConfig(model_name)["log_path"])
+
+
+last_p = 0
+
+
+def GetTrainProgress(model_name):
+    global last_p
+    latest_log = FileUtils.ReadFile(ConfigReader.GetModelConfig(model_name)["log_path"])
+    if not latest_log or len(latest_log) == 0 or len(latest_log[-1].split(",")) != 2:
+        return last_p
+    latest_log = latest_log[-1].split(',')
+    s1, s2 = latest_log[0], latest_log[1]
+    p = 0
+    if s1 == "MeanShift":
+        p = min(10, last_p + 1)
+    if s1 == "Pair":
+        if s2 == "Fin":
+            p = 40
+        else:
+            p = 10 + int(30 * float(s2))
+    if s1 == "PreTrain":
+        if s2 == "Fin":
+            p = 50
+        else:
+            p = 40 + 10 * int(10 * float(s2))
+    if s1 == "Train":
+        if s2 == "Fin":
+            p = 100
+
+        else:
+            p = 50 + 50 * int(50 * float(s2))
+
+    last_p = p
+    if last_p == 100:
+        last_p = 0
+    print(latest_log, p)
+    return p
+
+
+def DownloadModel(model_name):
+    model_path = ConfigReader.GetModelConfig(model_name)["model_out_path"]
+    f = open(model_path, "rb")
+    data = f.read()
+    f.close()
+    response = HttpResponse(data, content_type='application/octet-stream')
+    response['Content-Disposition'] = 'attachment; filename=%s' % "{}.pth".format(model_name)
+    return response
 
 
 if __name__ == "__main__":

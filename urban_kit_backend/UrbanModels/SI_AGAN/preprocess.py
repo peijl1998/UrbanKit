@@ -19,6 +19,7 @@ log_path = config["log_path"]
 
 strange_num = -1.2345
 
+
 def GetGridMap(x, y, size, region):
     min_p = [361, 361]
     max_p = [-1, -1]
@@ -32,26 +33,27 @@ def GetGridMap(x, y, size, region):
         if r[1] >= max_p[1]:
             max_p[1] = r[1]
 
-    x = math.ceil( (size - 1) * (x - min_p[0]) / (max_p[0] - min_p[0]) )
-    y = math.ceil( (size - 1) * (y - min_p[1]) / (max_p[1] - min_p[1]) )
+    x = math.ceil((size - 1) * (x - min_p[0]) / (max_p[0] - min_p[0]))
+    y = math.ceil((size - 1) * (y - min_p[1]) / (max_p[1] - min_p[1]))
 
     return x, y
 
-# X: (size, 4)  [time, latitude, longitude, value]
+
+# X: (size, 4)  [time, longitude, latitude, value]
 def GenerateLowHighPair(X):
     low_quality_data = []
     high_quality_data = []
 
     # Get The Densest Region
-    region_values = X[np.where(X[:, 0] == X[0,0]), 1:-1][0]
+    region_values = X[np.where(X[:, 0] == X[0, 0]), 1:-1][0]
     dense_region = utils.MeanShift(list(region_values[:, :]), radius=ms_radius, bandwidth=ms_bandwith)
     dense_region = region_values[np.array(dense_region)]
     dense_region_key = ["{},{}".format(x[0], x[1]) for x in dense_region]
-    FileUtils.WriteFile("[SPLIT]\nMeanShift Finished\n", log_path, "a")
+    FileUtils.WriteFile("MeanShift,Fin\n", log_path, "a")
 
     # Generate Low and High
     for idx, t in enumerate(np.unique(X[:, 0])):
-        FileUtils.WriteFile("Generate Low-High Pair: {}/{}\n".format(idx+1, len(np.unique(X[:, 0]))), log_path, "a")
+        FileUtils.WriteFile("Pair,{}\n".format((idx + 1) /len(np.unique(X[:, 0]))), log_path, "a")
         low_z = np.full((grid_size, grid_size), strange_num)
         high_z = np.full((grid_size, grid_size), strange_num)
 
@@ -114,14 +116,11 @@ def GenerateLowHighPair(X):
 
         low_quality_data.append(low_z)
         high_quality_data.append(high_z)
-    FileUtils.WriteFile("Finish Low-High Pair Generation.\n", log_path, "a")
+    FileUtils.WriteFile("Pair,Fin\n", log_path, "a")
     low_quality_data = np.array(low_quality_data)
     high_quality_data = np.array(high_quality_data)
-    print(low_quality_data.shape, high_quality_data.shape)
     np.save(low_data_path, low_quality_data)
     np.save(high_data_path, high_quality_data)
 
-
 if __name__ == '__main__':
     pass
-

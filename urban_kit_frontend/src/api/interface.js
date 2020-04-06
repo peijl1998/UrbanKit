@@ -125,13 +125,31 @@ async function GetMultiAttrById(data_name, attr_names, id) {
   return res.data;
 }
 
-async function TrainModel(model_name, data_name, attr_names) {
+async function SetModelParameter(model_name, params) {
+  var api = GetApi(global_.apis["set_model_parameter"]);
+  const res = await axios.get(api, {
+    params: {
+      model_name: model_name,
+      grid_size: params["grid_size"],
+      generator_lr: params["generator_lr"],
+      discriminator_lr: params["discriminator_lr"],
+      pre_train_epoch: params["pre_train_epoch"],
+      train_epoch: params["train_epoch"],
+      batch_size: params["batch_size"],
+      mean_shift_radius: params["ms_radius"],
+      mean_shift_bandwith: params["ms_bandwith"],
+    }
+  });
+  return res.data;
+}
+
+async function TrainModel(model_name, data_name, attr_name) {
   var api = GetApi(global_.apis["train_model"]);
   const res = await axios.get(api, {
     params: {
       model_name: model_name,
       data_name: data_name,
-      attr_names: attr_names,
+      attr_name: attr_name,
     }
   });
   return res.data;
@@ -146,6 +164,50 @@ async function GetTrainProgress(model_name) {
   });
   return res.data;
 }
+
+async function PredictOne(long, lat, model_name, data_name, time_step, attr_name) {
+  var api = GetApi(global_.apis["predict_one"]);
+  const res = await axios.get(api, {
+    params: {
+      longitude: long,
+      latitude: lat,
+      data_name: data_name,
+      model_name: model_name,
+      time_step: time_step,
+      attr_name: attr_name
+    }
+  });
+  return res.data;
+}
+
+async function PredictMany(model_name, data_name, time_step, attr_name) {
+  var api = GetApi(global_.apis["predict_many"]);
+  const res = await axios.get(api, {
+    params: {
+      model_name: model_name,
+      data_name: data_name,
+      time_step: time_step,
+      attr_name: attr_name
+    }
+  });
+  return res.data;
+}
+
+async function RemoveLog(model_name) {
+  var api = GetApi(global_.apis["remove_log"])
+  const res = await axios.get(api, {
+    params: {
+      model_name: model_name
+    }
+  });
+  return res.data;
+}
+
+async function DownloadModel(model_name) {
+  var api = GetApi(global_.apis["download_model"]);
+  window.open(api+"?"+"model_name="+model_name);
+}
+
 
 
 function sleep(ms) {
@@ -172,7 +234,12 @@ export default {
       Vue.prototype.GetTopAttrByTime = (data_name, attr_name, time_step, top) => GetTopAttrByTime(data_name, attr_name, time_step, top),
       Vue.prototype.GetIdStatByTime = (data_name, attr_name, time_step, stat_name) => GetIdStatByTime(data_name, attr_name, time_step, stat_name),
       Vue.prototype.sleep = (ms) => sleep(ms),
+      Vue.prototype.SetModelParameter = (model_name, params) => SetModelParameter(model_name, params),
+      Vue.prototype.RemoveLog = (model_name) => RemoveLog(model_name),
+      Vue.prototype.DownloadModel = (model_name) => DownloadModel(model_name),
       Vue.prototype.TrainModel = (model_name, data_name, attr_names) => TrainModel(model_name, data_name, attr_names),
-      Vue.prototype.GetTrainProgress = (model_name) => GetTrainProgress(model_name)
+      Vue.prototype.GetTrainProgress = (model_name) => GetTrainProgress(model_name),
+      Vue.prototype.PredictOne = (long, lat, model_name, data_name, time_step, attr_name) => PredictOne(long, lat, model_name, data_name, time_step, attr_name),
+      Vue.prototype.PredictMany = (model_name, data_name, time_step, attr_name) => PredictMany(model_name, data_name, time_step, attr_name)
   }
 }

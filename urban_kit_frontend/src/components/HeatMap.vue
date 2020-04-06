@@ -124,6 +124,7 @@ export default {
           data: JSON.parse(JSON.stringify(this.dataList)),
         }],
       };
+      console.log(JSON.parse(JSON.stringify(this.dataList)));
       this.heatChart.setOption(this.option);
     },
     getCenter(data) {

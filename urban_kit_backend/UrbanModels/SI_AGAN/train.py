@@ -41,7 +41,6 @@ def run():
 
     content_criterion = nn.MSELoss()
     adversarial_criterion = nn.BCELoss()
-    ones_const = Variable(torch.ones(BATCH_SIZE, 1))
 
     if IS_CUDA:
         generator.cuda()
@@ -49,14 +48,12 @@ def run():
         feature_extractor.cuda()
         content_criterion.cuda()
         adversarial_criterion.cuda()
-        ones_const = ones_const.cuda()
 
     # ----- Pre Train Generator -----#
     optim_generator = optim.Adam(generator.parameters(), lr=GENERATOR_LR)
     optim_discriminator = optim.Adam(discriminator.parameters(), lr=DISCRIMINATOR_LR)
 
     logger.info('Generator pre-training')
-    FileUtils.WriteFile("Begin Pre Training.\b", log_path, "a")
     record_loss = 0.0
     for epoch in range(PRE_TRAIN_EPOCH):
         for i, data in enumerate(dataloader):
@@ -80,7 +77,7 @@ def run():
 
             optim_generator.step()
 
-            FileUtils.WriteFile("Pre Train:{}/{}".format(epoch*len(dataloader) + i + 1,
+            FileUtils.WriteFile("Pre,{}\n".format((epoch*len(dataloader) + i + 1) /
                                                           PRE_TRAIN_EPOCH*len(dataloader)), log_path, "a")
             if i % 10 == 0:
                 logger.info("[{}/{}][{}/{}] Pre Train Loss: {}".format(
@@ -95,29 +92,28 @@ def run():
     optim_discriminator = optim.Adam(discriminator.parameters(), lr=DISCRIMINATOR_LR * 0.1)
 
     logger.info("Begin Training...")
-    FileUtils.WriteFile("Finish Pre Train.\n", log_path, "a")
-    FileUtils.WriteFile("Begin GAN Train.\n", log_path, "a")
+    FileUtils.WriteFile("Pre,Fin\n", log_path, "a")
     for epoch in range(TRAIN_EPOCH):
         for i, data in enumerate(dataloader):
             low_res, high_res_real = data
             low_res = low_res.permute(0, 3, 1, 2).float()
             high_res_real = high_res_real.permute(0, 3, 1, 2).float()
-
             # Generate real and fake inputs
             if IS_CUDA:
                 high_res_real = Variable(high_res_real.cuda())
                 high_res_fake = generator(Variable(low_res).cuda())
-                target_real = Variable(torch.rand(BATCH_SIZE, 1) * 0.5 + 0.7).cuda()
-                target_fake = Variable(torch.rand(BATCH_SIZE, 1) * 0.3).cuda()
+                target_real = Variable(torch.rand(high_res_real.shape[0], 1) * 0.5 + 0.7).cuda()
+                target_fake = Variable(torch.rand(high_res_fake.shape[0], 1) * 0.3).cuda()
+                ones_const = Variable(torch.ones(high_res_fake.shape[0], 1)).cuda()
             else:
                 high_res_real = Variable(high_res_real)
                 high_res_fake = generator(Variable(low_res))
-                target_real = Variable(torch.rand(BATCH_SIZE, 1) * 0.5 + 0.7)
-                target_fake = Variable(torch.rand(BATCH_SIZE, 1) * 0.3)
+                target_real = Variable(torch.rand(high_res_real.shape[0], 1) * 0.5 + 0.7)
+                target_fake = Variable(torch.rand(high_res_fake.shape[0], 1) * 0.3)
+                ones_const = Variable(torch.ones(high_res_fake.shape[0], 1))
 
             ######### Train discriminator #########
             discriminator.zero_grad()
-
             discriminator_loss = adversarial_criterion(discriminator(high_res_real), target_real) + \
                                  adversarial_criterion(discriminator(Variable(high_res_fake.data)), target_fake)
 
@@ -140,7 +136,9 @@ def run():
             optim_generator.step()
 
             ######### Status and display #########
-            FileUtils.WriteFile("GAN Train:{}/{}".format(i + 1 + epoch * len(dataloader), TRAIN_EPOCH*len(dataloader)))
+            FileUtils.WriteFile(
+                "Train,{}\n".format((i + 1 + epoch * len(dataloader)) / TRAIN_EPOCH*len(dataloader)),
+                log_path, "a")
             logger.info('[{}/{}][{}/{}] Discriminator_Loss: {} Generator_Loss (Content/Advers/Total): {} {} {}'.format(
                 epoch + 1, TRAIN_EPOCH,
                 i + 1, len(dataloader),

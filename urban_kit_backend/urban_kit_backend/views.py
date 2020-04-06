@@ -1,7 +1,10 @@
+import os
+
 from django.http import HttpResponse, JsonResponse
 from UrbanHelper import Helper
 from UrbanUtils.IO import ConfigReader
 from UrbanHelper.Helper import MyEncoder
+
 
 def get_collection_list(request):
     return JsonResponse({"data": Helper.GetCollectionLists(), "msg": "success"}, encoder=MyEncoder)
@@ -13,6 +16,21 @@ def delete_collection(request):
         res["msg"] = "failed"
     return JsonResponse(res, encoder=MyEncoder)
 
+def upload_model(request):
+    print(request.FILES.keys())
+    file = request.FILES.get("file", None)
+    if not file:
+        return JsonResponse({"data": "no file for upload.", "msg": "failed"})
+    else:
+        model_name = file.name.split(".")[0]
+        path = ConfigReader.GetModelConfig(model_name)["model_out_path"]
+        if os.path.exists(path):
+            os.remove(path)
+        dst = open(path, "wb+")
+        for chunk in file.chunks():
+            dst.write(chunk)
+        dst.close()
+        return JsonResponse({"data": "OK", "msg": "success"})
 
 def upload_csv_data(request):
     if request.method == "POST":
@@ -49,13 +67,16 @@ def get_attr_list(request):
     data_name = request.GET.get("data_name")
     return JsonResponse({'data': Helper.GetAttrList(data_name), 'msg': 'success'}, encoder=MyEncoder)
 
+
 def get_id_list(request):
     data_name = request.GET.get("data_name")
     return JsonResponse({'data': Helper.GetIdList(data_name), 'msg': 'success'}, encoder=MyEncoder)
 
+
 def get_id_position(request):
     data_name = request.GET.get("data_name")
     return JsonResponse({'data': Helper.GetIdPosition(data_name), 'msg': 'success'}, encoder=MyEncoder)
+
 
 def get_attr_by_time(request):
     data_name = request.GET.get("data_name")
@@ -64,6 +85,7 @@ def get_attr_by_time(request):
     return JsonResponse({'data': Helper.GetAttrByTime(data_name, attr_name, time_step),
                          'msg': 'success'}, encoder=MyEncoder)
 
+
 def get_top_attr_by_time(request):
     data_name = request.GET.get("data_name")
     attr_name = request.GET.get("attr_name")
@@ -71,6 +93,7 @@ def get_top_attr_by_time(request):
     top = int(request.GET.get("top"))
     return JsonResponse({'data': Helper.GetTopAttrByTime(data_name, attr_name, time_step, top),
                          'msg': 'success'}, encoder=MyEncoder)
+
 
 def get_id_stat_by_time(request):
     data_name = request.GET.get("data_name")
@@ -105,17 +128,29 @@ def train_model(request):
                         encoder=MyEncoder)
 
 
-test_progress = 0
 def get_train_progress(request):
-    global test_progress
     model_name = request.GET.get("model_name")
-    progress = 100
-    progress = min(progress, test_progress)
-    if progress == 100:
-        test_progress = 0
-    else:
-        test_progress += 100
-    return JsonResponse({'data': progress}, encoder=MyEncoder)
+    return JsonResponse({'data': Helper.GetTrainProgress(model_name)}, encoder=MyEncoder)
+
+
+def predict_one(request):
+    model_name = request.GET.get("model_name")
+    long = request.GET.get("longitude")
+    lat = request.GET.get("latitude")
+    data_name = request.GET.get("data_name")
+    time_step = int(request.GET.get("time_step"))
+    attr_name = request.GET.get("attr_name")
+    return JsonResponse({'data': Helper.PredictOne(model_name, data_name, long, lat, time_step, attr_name),
+                         'msg': 'success'}, encoder=MyEncoder)
+
+
+def predict_many(request):
+    model_name = request.GET.get("model_name")
+    data_name = request.GET.get("data_name")
+    time_step = int(request.GET.get("time_step"))
+    attr_name = request.GET.get("attr_name")
+    return JsonResponse({'data': Helper.PredictMany(model_name, data_name, time_step, attr_name),
+                         'msg': 'success'}, encoder=MyEncoder)
 
 
 def set_model_params(request):
@@ -129,6 +164,14 @@ def set_model_params(request):
         ConfigReader.SetModelConfig(config, "SI-AGAN")
 
     return JsonResponse({"msg": "success"}, encoder=MyEncoder)
+
+
+def remove_log(request):
+    return JsonResponse({'msg': Helper.RemoveLog(request.GET.get("model_name"))}, encoder=MyEncoder)
+
+def download_model(request):
+    return Helper.DownloadModel(request.GET.get("model_name"))
+
 
 
 def test(request):

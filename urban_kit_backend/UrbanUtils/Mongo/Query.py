@@ -19,4 +19,5 @@ def QueryManyDocument(collection, filter=None, mask=None):
     if filter is None:
         filter = {}
     mask["_id"] = 0
+
     return collection.find(filter, mask)

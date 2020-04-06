@@ -1124,6 +1124,12 @@ const apis = {
     "get_multi_attr_by_id": "/query/get_multi_attr_by_id",
     "train_model": "/model/train_model",
     "get_train_progress": "/model/get_train_progress",
+    "set_model_parameter": "/model/set_model_parameter",
+    "predict_one": "/model/predict_one",
+    "predict_many": "/model/predict_many",
+    "remove_log": "/model/remove_log",
+    "download_model": "/model/download_model",
+    "upload_model": "/model/upload_model"
 }
 
 var data_name = null;

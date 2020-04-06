@@ -2,32 +2,76 @@
 # -*- coding:utf-8 -*-
 # Author: Pei
 # This file is to solve mongo I/O slow problem.
+from bson import json_util
 
-from UrbanUtils.Mongo import Base as Base1
+from UrbanUtils.Mongo import MongoConnect, Query
 import pandas as pd
 import numpy as np
 import json
+from bson import ObjectId
+import datetime
+import time
 
 HAS_DATA = False
 DATA = None
 NAME = None
 test_path = "D:\Files\Lab\kdd_beijing_17_18_all.csv"
+placeholder = {"_":-1}
+mongo = MongoConnect.ConnectMongo()
+
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        if isinstance(o, datetime.datetime):
+            return datetime.datetime.strftime(o, '%Y-%m-%d %H:%M:%S')
+        return json.JSONEncoder.default(self, o)
 
 def GetCollectionLists():
-    return Base1.GetCollectionLists()
+    return mongo.list_collection_names()
 
 def DeleteCollection(collection_name):
-    return Base1.DeleteCollection(collection_name)
+    if collection_name not in GetCollectionLists():
+        return False
+    else:
+        try:
+            mongo[collection_name].drop()
+            return True
+        except Exception as e:
+            print("Delete Collection Failed:",e)
+            return False
 
 def CreateCollection(collection_name):
-    return Base1.CreateCollection(collection_name)
+    if collection_name not in GetCollectionLists():
+        mongo[collection_name].insert_one(placeholder)
+
+def DeleteDocument(collection_name, filter):
+    mongo[collection_name].delete_one(filter)
+
+def CreateDocumentsInBatch(collection_name, docs):
+    DeleteDocument(collection_name, placeholder)
+    mongo[collection_name].insert_many(docs)
+
+
 
 def UpdateMemData(collection_name, local_path=test_path):
     global DATA
     global NAME
     global HAS_DATA
     if not local_path:
-        all_data = json.loads(Base1.QueryManyDocument(collection_name, filter=None, mask={"_id": 0}))
+        r = Query.QueryManyDocument(collection = mongo[collection_name])
+        all_data = []
+
+        last_time = time.time()
+        idx = 0
+        while True:
+            i = r.next()
+            idx += 1
+            if idx % 1 == 0:
+                print ("avg time for one: ", (time.time() - last_time))
+                last_time = time.time()
+            #all_data.append(i)
         data_dict = {}
         for item in all_data:
             for k in item.keys():
@@ -35,7 +79,7 @@ def UpdateMemData(collection_name, local_path=test_path):
                     data_dict[k].append(item[k])
                 else:
                     data_dict[k] = [item[k]]
-        DATA = pd.DataFrame.from_dict(data_dict, columns=data_dict.keys())
+        DATA = pd.DataFrame.from_dict(data_dict)
         NAME = collection_name
         HAS_DATA = True
     else:

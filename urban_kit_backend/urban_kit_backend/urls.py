@@ -18,7 +18,12 @@ urlpatterns = [
 
     path(r'model/train_model', views.train_model),
     path(r'model/get_train_progress', views.get_train_progress),
-    path(r'model/set_model_params', views.set_model_params),
+    path(r'model/set_model_parameter', views.set_model_params),
+    path(r'model/predict_one', views.predict_one),
+    path(r'model/predict_many', views.predict_many),
+    path(r'model/remove_log', views.remove_log),
+    path(r'model/download_model', views.download_model),
+    path(r'model/upload_model', views.upload_model),
 
     path(r'test/', views.test)
 ]

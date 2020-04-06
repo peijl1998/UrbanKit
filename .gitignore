@@ -15,6 +15,7 @@ urban_kit_backend/.idea/
 # C extensions
 *.so
 something.txt
+*.log
 
 # Distribution / packaging
 .Python

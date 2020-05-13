@@ -26,6 +26,8 @@ urlpatterns = [
     path(r'model/upload_model', views.upload_model),
     path(r'model/upload_model', views.upload_model),
     path(r'model/cal_corr', views.cal_corr),
+    path(r'model/predict_time_series', views.predict_time_series),
+    path(r'model/detection_time_series', views.detection_time_series),
 
     path(r'test/', views.test)
 ]

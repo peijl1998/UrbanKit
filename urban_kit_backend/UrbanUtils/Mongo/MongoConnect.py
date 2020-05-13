@@ -19,6 +19,7 @@ def ConnectMongo():
         pwd = database["password"]
         port = database["port"]
         host = 'mongodb://{}:{}@{}:{}/?authSource={}&authMechanism=SCRAM-SHA-1'.format(user, pwd, ip, port, collection)
+        print(host)
         mongo = pymongo.MongoClient(host)[collection]
         print ("MongoDB Connect Successful!")
         return mongo

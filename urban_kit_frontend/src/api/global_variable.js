@@ -1130,7 +1130,9 @@ const apis = {
     "remove_log": "/model/remove_log",
     "download_model": "/model/download_model",
     "upload_model": "/model/upload_model",
-    "cal_corr": "/model/cal_corr"
+    "cal_corr": "/model/cal_corr",
+    "predict_time_series": "/model/predict_time_series",
+    "detection_time_series": "/model/detection_time_series",
 }
 
 var data_name = null;

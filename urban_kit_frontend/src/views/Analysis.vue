@@ -236,15 +236,15 @@
     </el-dialog>
     <!--TS Prediction Modal-->
     <el-dialog title="Time Series Prediction" :visible.sync="prediction_visible" width="80%" center>
-      <p>1. Linear Interpolation</p>
-      <p>2. More advanced Interpolation</p>
-      <p>3. GAN Interpolation</p>
+      <div :style="getDialogStyle">
+        <TimeSeriesPredict></TimeSeriesPredict>
+      </div>
     </el-dialog>
     <!--Anomaly Detection Modal-->
     <el-dialog title="Time Series Anomaly Detection" :visible.sync="detection_visible" width="80%" center>
-      <p>1. Linear Interpolation</p>
-      <p>2. More advanced Interpolation</p>
-      <p>3. GAN Interpolation</p>
+      <div :style="getDialogStyle">
+        <AnomalyDetection></AnomalyDetection>
+      </div>
     </el-dialog>
     <!--Heat Map Modal-->
     <el-dialog title="Heat Map Distribution" :visible.sync="heat_visible" width="80%" center class="my_dialog">
@@ -270,6 +270,8 @@ import Top from '@/components/Top';
 import Map from '@/components/Map';
 import HeatMap from '@/components/HeatMap';
 import Correlation from '@/components/Correlation';
+import TimeSeriesPredict from '@/components/TimeSeriesPredict';
+import AnomalyDetection from '@/components/AnomalyDetection';
 import Interpolation from '@/components/Interpolation';
 
 export default {
@@ -284,7 +286,9 @@ export default {
     Map,
     HeatMap,
     Correlation,
-    Interpolation
+    Interpolation,
+    TimeSeriesPredict,
+    AnomalyDetection
   },
   data() {
     return {

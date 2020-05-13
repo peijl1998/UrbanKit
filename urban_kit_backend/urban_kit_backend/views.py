@@ -119,6 +119,22 @@ def get_multi_attr_by_id(request):
     return JsonResponse({'data': Helper.GetMultiAttrById(data_name, attrs, id),
                          'msg': 'success'}, encoder=MyEncoder)
 
+def predict_time_series(request):
+    data_name = request.GET.get("data_name")
+    id = request.GET.get("id")
+    attrs = request.GET.get("attr_name")
+
+    return JsonResponse({'data': Helper.PredictTimeSeries(data_name, attrs, id),
+                         'msg': 'success'}, encoder=MyEncoder)
+
+
+def detection_time_series(request):
+    data_name = request.GET.get("data_name")
+    id = request.GET.get("id")
+    attrs = request.GET.get("attr_name")
+
+    return JsonResponse({'data': Helper.DetectionTimeSeries(data_name, attrs, id),
+                         'msg': 'success'}, encoder=MyEncoder)
 
 def cal_corr(request):
     method = request.GET.get("method")

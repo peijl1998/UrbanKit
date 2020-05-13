@@ -228,9 +228,6 @@ def CalCorr(data_name, attr_names, id, method):
 
     return ret
 
-
-
-
 def TrainModel(model_name, data_name, attr_name):
     RemoveLog(model_name)
     return ModelHelper.TrainModel(model_name, data_name, attr_name)
@@ -348,6 +345,113 @@ def DownloadModel(model_name):
     response = HttpResponse(data, content_type='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=%s' % "{}.pth".format(model_name)
     return response
+
+
+
+
+def GetAttrById(data_name, attr_name, id):
+    items = Base.QueryManyDocument(collection_name=data_name, filter={'id': id}, mask={"time": 1, attr_name: 1})
+    if not items:
+        return False
+
+    ret = []
+    for item in items:
+        ret.append({'time': item['time'], 'value': item[attr_name]})
+
+    return ret
+
+
+import lightgbm as lgb
+def PredictTimeSeries(data_name, attr_name, id):
+    print(data_name, attr_name, id)
+    raw = GetAttrById(data_name, attr_name, id)
+    timeline = []
+    train_valid = []
+    train = []
+    valid = []
+    test = []
+
+    l = 256
+    f = 24
+
+    for i, k in enumerate(raw):
+        timeline.append(i)
+        train_valid.append(k["value"])
+
+    split_idx =  len(train_valid) #int(len(train_valid) * 0.99)
+    train = train_valid[:split_idx]
+    valid = train_valid[split_idx:]
+
+    def make_train_data(ts, l):
+        feature = []
+        label = []
+        for i in range(len(ts) - l):
+            feature.append(ts[i:i+l])
+            label.append(ts[i+l])
+
+        return np.array(feature), np.array(label)
+
+    feature, label = make_train_data(train, l)
+    model = lgb.LGBMRegressor()
+    model.fit(feature, label)
+
+
+    def get_result(ts, n, model):
+        result = []
+        for i in range(n):
+            temp = int(model.predict(np.array(ts).reshape(1, -1))[0])
+            result.append(temp)
+            ts = ts[1:] + [temp]
+        return result
+
+    #valid_pred = get_result(train[-l:], len(valid), model)
+    test = get_result(train_valid[-l:], f, model)
+    valid_pred = [None] * l + list(model.predict(feature).ravel()) + [None] * f
+
+    #valid_pred = [None] * len(train) + valid_pred + [None] * len(test)
+    test = [None] * len(train_valid) + test
+    timeline = list(range(len(test)))
+
+    return [timeline, train_valid+[None]*f, valid_pred, test]
+
+
+
+from sklearn.ensemble import IsolationForest
+from scipy import stats
+def DetectionTimeSeries(data_name, attr_name, id):
+    raw = GetAttrById(data_name, attr_name, id)
+    timeline = []
+    ts = []
+    res = []
+
+    for i, k in enumerate(raw):
+        timeline.append(i)
+        ts.append(k["value"])
+
+
+    win_size = 24
+    def minibatch(arr, batch_size):
+        for i in range(0, len(arr), batch_size):
+            yield arr[i:i + batch_size]
+
+    train = list(minibatch(ts, win_size))[:-1]
+
+    ratio = 0.1
+    model = IsolationForest(max_samples=100, random_state=1024, contamination=ratio)
+    model.fit(np.array(train))
+    scores_pred = model.decision_function(np.array(train))
+    threshold = stats.scoreatpercentile(scores_pred, 100 * ratio)
+    pred = list(model.predict(np.array(train)))
+
+    for i, row in enumerate(train):
+        if pred[i] < threshold:
+            res += row
+        else:
+            res += [None] * win_size
+    res += [None] * (len(ts) - len(res))
+
+    return [timeline, ts, res] 
+
 
 
 if __name__ == "__main__":

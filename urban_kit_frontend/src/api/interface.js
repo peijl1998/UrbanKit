@@ -138,6 +138,29 @@ async function CalCorr(data_name, attr_names, id, method) {
   return res.data;
 }
 
+async function PredictTimeSeries(data_name, attr_name, id) {
+  var api = GetApi(global_.apis["predict_time_series"]);
+  const res = await axios.get(api, {
+    params: {
+      data_name: data_name,
+      attr_name: attr_name,
+      id: id,
+    }
+  });
+  return res.data;
+}
+
+async function AnomalyDetection(data_name, attr_name, id) {
+  var api = GetApi(global_.apis["detection_time_series"]);
+  const res = await axios.get(api, {
+    params: {
+      data_name: data_name,
+      attr_name: attr_name,
+      id: id,
+    }
+  });
+  return res.data;
+}
 
 
 async function SetModelParameter(model_name, params) {
@@ -256,6 +279,8 @@ export default {
       Vue.prototype.GetTrainProgress = (model_name) => GetTrainProgress(model_name),
       Vue.prototype.PredictOne = (long, lat, model_name, data_name, time_step, attr_name) => PredictOne(long, lat, model_name, data_name, time_step, attr_name),
       Vue.prototype.PredictMany = (model_name, data_name, time_step, attr_name) => PredictMany(model_name, data_name, time_step, attr_name),
-      Vue.prototype.CalCorr = (data_name, attr_names, id, method) => CalCorr(data_name, attr_names, id, method)
+      Vue.prototype.CalCorr = (data_name, attr_names, id, method) => CalCorr(data_name, attr_names, id, method),
+      Vue.prototype.PredictTimeSeries = (data_name, attr_name, id) => PredictTimeSeries(data_name, attr_name, id),
+      Vue.prototype.AnomalyDetection = (data_name, attr_name, id) => AnomalyDetection(data_name, attr_name, id)
   }
 }

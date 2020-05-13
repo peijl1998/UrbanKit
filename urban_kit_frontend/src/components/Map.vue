@@ -23,7 +23,7 @@ export default {
   },
   watch: {
     async time_step() {
-      if (this.is_not_prepared()) return ;
+      if (this.is_not_prepared()) return;
       await this.getData();
       if (this.option == null) {
         this.draw();
@@ -35,11 +35,12 @@ export default {
       }
     },
     async attribute() {
-      if (this.is_not_prepared()) return ;
+      if (this.is_not_prepared()) return;
       await this.getData();
       if (this.option == null) {
         this.draw();
       } else {
+        this.option.series[0].name = this.attribute;
         this.option.visualMap.min = this.min_value;
         this.option.visualMap.max = this.max_value;
         this.option.series[0].data = JSON.parse(JSON.stringify(this.dataList));
@@ -99,13 +100,13 @@ export default {
     },
     draw() {
       if (this.is_not_prepared() || this.data_signal == false) {
-        return ;
+        return;
       }
       this.option = {
         tooltip: {
           trigger: 'item',
           formatter: function(params) {
-            return this.attribute + "<br/><strong>" + params.data.name + "</strong>:" + params.data.value[2];
+            return params.seriesName + "<br /><strong>" + params.data.name + "</strong>:" + params.data.value[2];
           }
         },
         visualMap: {
@@ -132,7 +133,7 @@ export default {
         },
         series: [{
           symbol: "circle",
-          name: "name",
+          name: this.attribute,
           type: 'effectScatter',
           showEffectOn: 'render',
           rippleEffect: {

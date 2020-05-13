@@ -8,7 +8,6 @@
         */
       </p>
       <div class="button-box">
-        <el-button type="info" class="button1">Documents</el-button>
         <el-button type="info" class="button2" @click="refreshDataList();getStartVisible=true">Get Started</el-button>
       </div>
     </div>

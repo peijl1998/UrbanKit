@@ -24,6 +24,8 @@ urlpatterns = [
     path(r'model/remove_log', views.remove_log),
     path(r'model/download_model', views.download_model),
     path(r'model/upload_model', views.upload_model),
+    path(r'model/upload_model', views.upload_model),
+    path(r'model/cal_corr', views.cal_corr),
 
     path(r'test/', views.test)
 ]

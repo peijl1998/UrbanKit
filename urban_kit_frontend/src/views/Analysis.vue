@@ -253,10 +253,10 @@
       </div>
     </el-dialog>
     <!--Correlation Analysis Modal-->
-    <el-dialog title="Time Series Anomaly Detection" :visible.sync="correlation_visible" width="80%" center>
-      <p>1. Linear Interpolation</p>
-      <p>2. More advanced Interpolation</p>
-      <p>3. GAN Interpolation</p>
+    <el-dialog title="Correlation Analysis" :visible.sync="correlation_visible" width="80%" center>
+      <div :style="getDialogStyle">
+        <Correlation></Correlation>
+      </div>
     </el-dialog>
   </el-container>
 </template>
@@ -269,6 +269,7 @@ import CustomedHist from '@/components/CustomedHist';
 import Top from '@/components/Top';
 import Map from '@/components/Map';
 import HeatMap from '@/components/HeatMap';
+import Correlation from '@/components/Correlation';
 import Interpolation from '@/components/Interpolation';
 
 export default {
@@ -282,6 +283,7 @@ export default {
     Top,
     Map,
     HeatMap,
+    Correlation,
     Interpolation
   },
   data() {

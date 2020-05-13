@@ -11,7 +11,7 @@ import json
 import numpy as np
 
 config = ConfigReader.GetConfig()
-
+last_p = 0
 
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -187,6 +187,50 @@ def GetMultiAttrById(data_name, attr_names, id):
     return ret
 
 
+from scipy.stats import pearsonr
+from scipy.spatial.distance import euclidean
+from fastdtw import fastdtw
+def CalCorr(data_name, attr_names, id, method):
+    raw = GetMultiAttrById(data_name, attr_names, id)
+    raw = sorted(raw, key=lambda x:x["time"])
+
+    ts = {}
+    for a in attr_names:
+        ts[a] = []
+
+    for t in raw:
+        for a in attr_names:
+            ts[a].append(t["value"][a])
+
+    ret = []
+    record = {}
+    for a1 in attr_names:
+        for a2 in attr_names:
+            if a1 not in record:
+                record[a1] = {}
+            if a2 not in record:
+                record[a2] = {}
+            l1 = np.array(ts[a1])
+            l2 = np.array(ts[a2])
+            if method == 'DTW':
+                if a2 in record[a1]:
+                    d = record[a1][a2]
+                elif a1 in record[a2]:
+                    d = record[a2][a1]
+                else:
+                    d, _ = fastdtw(l1, l2, dist=euclidean)
+                    record[a1][a2] = d
+                    print(a1, a2)
+                ret.append([a1, a2, np.round(d)])
+            elif method == "Pearson":
+                d = np.round(pearsonr(l1, l2)[0], 3)
+                ret.append([a1, a2, d])
+
+    return ret
+
+
+
+
 def TrainModel(model_name, data_name, attr_name):
     RemoveLog(model_name)
     return ModelHelper.TrainModel(model_name, data_name, attr_name)
@@ -200,6 +244,8 @@ def PredictOne(model_name, data_name, longitude, latitude, time_step, attr_name)
         id_val[item["id"]] = item["value"]
     more = []
     for k in id_pos:
+        if k not in id_val:
+            continue
         more.append(id_pos[k] + [id_val[k]])
     return ModelHelper.PredictOne(model_name, longitude, latitude, more)
 
@@ -212,6 +258,8 @@ def PredictMany(model_name, data_name, time_step, attr_name):
         id_val[item["id"]] = item["value"]
     more = []
     for k in id_pos:
+        if k not in id_val:
+            continue
         more.append(id_pos[k] + [id_val[k]])
     return ModelHelper.PredictMany(model_name, more)
 
@@ -254,11 +302,9 @@ def PredictMany1(model_name, data_name, time_step, attr_name):
 
 
 def RemoveLog(model_name):
+    global last_p
+    last_p = 0
     FileUtils.DeleteFile(ConfigReader.GetModelConfig(model_name)["log_path"])
-
-
-last_p = 0
-
 
 def GetTrainProgress(model_name):
     global last_p

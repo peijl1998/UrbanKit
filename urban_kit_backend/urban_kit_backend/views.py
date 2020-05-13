@@ -120,6 +120,15 @@ def get_multi_attr_by_id(request):
                          'msg': 'success'}, encoder=MyEncoder)
 
 
+def cal_corr(request):
+    method = request.GET.get("method")
+    data_name = request.GET.get("data_name")
+    id = request.GET.get("id")
+    attrs = request.GET.getlist("attr_names[]")
+
+    return JsonResponse({'data': Helper.CalCorr(data_name, attrs, id, method),
+                         'msg': 'success'}, encoder=MyEncoder)
+
 def train_model(request):
     model_name = request.GET.get("model_name")
     data_name = request.GET.get("data_name")

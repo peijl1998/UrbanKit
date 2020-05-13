@@ -1129,7 +1129,8 @@ const apis = {
     "predict_many": "/model/predict_many",
     "remove_log": "/model/remove_log",
     "download_model": "/model/download_model",
-    "upload_model": "/model/upload_model"
+    "upload_model": "/model/upload_model",
+    "cal_corr": "/model/cal_corr"
 }
 
 var data_name = null;

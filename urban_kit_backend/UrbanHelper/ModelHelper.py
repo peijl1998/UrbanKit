@@ -17,6 +17,8 @@ def TrainModel(model_name, data_name, attr_name):
 
     for item in items:
         for k in ["time", "latitude", "longitude", attr_name]:
+            if k not in item:
+                continue
             v = item[k]
             if k in ["latitude", "longitude"]:
                 v = float(v)
@@ -27,8 +29,8 @@ def TrainModel(model_name, data_name, attr_name):
 
     raw_data = pd.DataFrame.from_dict(raw_data)[["time", "longitude", "latitude", attr_name]].values
     if model_name == "SI-AGAN" or "SI_AGAN":
-        #SI_AGAN_PREPROCESS.GenerateLowHighPair(raw_data)
-        #SI_AGAN_TRAIN.run()
+        SI_AGAN_PREPROCESS.GenerateLowHighPair(raw_data)
+        SI_AGAN_TRAIN.run()
         return True
 
 

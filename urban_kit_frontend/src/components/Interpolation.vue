@@ -23,8 +23,8 @@
         <!-- SI-AGAN Config-->
         <div class="full-height-width" :style="getHeightStyle" v-show="GAN.seen==2">
           <el-row type="flex" justify="space-between" style="margin-top: 30px">
-            <el-col :span="6">
-              <el-form label-position="left" label-width="70px" :model="GAN.params">
+            <el-col :span="7">
+              <el-form label-position="left" label-width="80px" :model="GAN.params">
                 <el-form-item label="Grid Size">
                   <el-input v-model="GAN.params.grid_size"></el-input>
                 </el-form-item>
@@ -49,7 +49,7 @@
                 </el-form-item>
               </el-form>
             </el-col>
-            <el-col :span="8">
+            <el-col :span="7">
               <el-form label-position="left" label-width="120px" :model="GAN.params">
                 <el-form-item label="Batch Size">
                   <el-input v-model="GAN.params.batch_size"></el-input>

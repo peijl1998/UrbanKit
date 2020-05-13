@@ -125,6 +125,21 @@ async function GetMultiAttrById(data_name, attr_names, id) {
   return res.data;
 }
 
+async function CalCorr(data_name, attr_names, id, method) {
+  var api = GetApi(global_.apis["cal_corr"]);
+  const res = await axios.get(api, {
+    params: {
+      data_name: data_name,
+      attr_names: attr_names,
+      id: id,
+      method: method
+    }
+  });
+  return res.data;
+}
+
+
+
 async function SetModelParameter(model_name, params) {
   var api = GetApi(global_.apis["set_model_parameter"]);
   const res = await axios.get(api, {
@@ -240,6 +255,7 @@ export default {
       Vue.prototype.TrainModel = (model_name, data_name, attr_names) => TrainModel(model_name, data_name, attr_names),
       Vue.prototype.GetTrainProgress = (model_name) => GetTrainProgress(model_name),
       Vue.prototype.PredictOne = (long, lat, model_name, data_name, time_step, attr_name) => PredictOne(long, lat, model_name, data_name, time_step, attr_name),
-      Vue.prototype.PredictMany = (model_name, data_name, time_step, attr_name) => PredictMany(model_name, data_name, time_step, attr_name)
+      Vue.prototype.PredictMany = (model_name, data_name, time_step, attr_name) => PredictMany(model_name, data_name, time_step, attr_name),
+      Vue.prototype.CalCorr = (data_name, attr_names, id, method) => CalCorr(data_name, attr_names, id, method)
   }
 }

@@ -67,9 +67,9 @@ def GenerateLowHighPair(X):
             i, j = GetGridMap(site[0], site[1], grid_size, dense_region)
             k = "%d,%d" % (i, j)
             if k in val:
-                val[k].append(site[2])
+                val[k].append(float(site[2]))
             else:
-                val[k] = [site[2]]
+                val[k] = [float(site[2])]
 
         for k in val.keys():
             i, j = map(int, k.split(","))

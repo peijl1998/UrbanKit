@@ -13,7 +13,7 @@ export default {
     return {
       mapChart: null,
       bmap: null,
-      option: null,
+      option: null,       
       geoCoordMap: null,
       dataList: null,
       min_value: 0,

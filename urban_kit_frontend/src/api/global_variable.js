@@ -855,7 +855,7 @@ const plainMapStyle = {
             "curZoomRegion": "6,10",
             "level": "6"
         }
-    }, {
+    },/* {
         "featureType": "cityhighway",
         "elementType": "geometry",
         "stylers": {
@@ -1106,7 +1106,7 @@ const plainMapStyle = {
         "stylers": {
             "visibility": "on"
         }
-    }]
+    }]*/]
 }
 
 const apis = {

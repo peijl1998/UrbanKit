@@ -1,6 +1,6 @@
-# urban_kit_frontend
+# frontend_fix
 
-> The Frontend for UrbanKit
+> A Vue.js project
 
 ## Build Setup
 

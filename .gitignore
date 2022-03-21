@@ -6,8 +6,8 @@ __pycache__/
 urban_kit_backend/Config/
 urban_kit_backend/UrbanModels/Temp/
 urban_kit_frontend/node_modules/
-urban_kit_frontend/index.html
-urban_kit_frontend/src/main.js
+# urban_kit_frontend/index.html
+# urban_kit_frontend/src/main.js
 urban_kit_frontend/dist
 urban_kit_frontend/package-lock.json
 user_config.json

@@ -4,7 +4,8 @@
 from django.http import HttpResponse
 
 from UrbanUtils.IO import ConfigReader, FileUtils
-from UrbanUtils.MongoPandas import Base
+#from UrbanUtils.MongoPandas import Base
+from UrbanUtils.Mongo import Base
 from UrbanUtils.Math import BaseStat
 from UrbanHelper import ModelHelper
 import json

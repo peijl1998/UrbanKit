@@ -86,6 +86,9 @@
     ```
 
   - upload the demo.csv and enjoy it:)
+  
+    - NOTE: set attribute in the MapController at first.
+    - for interpolation model, you can upload the demo model in the UrbanModels/Generator.pth
 
 
 

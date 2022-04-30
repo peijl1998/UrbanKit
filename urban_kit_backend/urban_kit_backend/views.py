@@ -17,13 +17,13 @@ def delete_collection(request):
     return JsonResponse(res, encoder=MyEncoder)
 
 def upload_model(request):
-    print(request.FILES.keys())
-    file = request.FILES.get("file", None)
+    file_name = list(request.FILES.keys())[0]
+    file = request.FILES.get(file_name, None)
     if not file:
         return JsonResponse({"data": "no file for upload.", "msg": "failed"})
     else:
         model_name = file.name.split(".")[0]
-        path = ConfigReader.GetModelConfig(model_name)["model_out_path"]
+        path = ConfigReader.GetModelConfig(file_name)["model_out_path"]
         if os.path.exists(path):
             os.remove(path)
         dst = open(path, "wb+")

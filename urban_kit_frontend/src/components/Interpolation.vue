@@ -247,7 +247,7 @@ export default {
         return;
       }
       var long = input_s[0].trim();
-      var lat = input_s[0].trim();
+      var lat = input_s[1].trim();
       var promise = this.PredictOne(long, lat, "SI-AGAN", this.global_.data_name, this.time_step, this.attribute);
       promise.then((response) => {
         this.GAN.inference.output = response.data;
